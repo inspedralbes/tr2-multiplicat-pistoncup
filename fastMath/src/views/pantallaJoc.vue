@@ -10,6 +10,9 @@ const fetchedData = ref(null);
 // Índice de la pregunta actual
 const currentQuestionIndex = ref(0);
 
+// Variable para el temporizador automático
+let autoNextTimer;
+
 // Realizar la solicitud Fetch
 onMounted(() => {
   fetch(url)
@@ -22,11 +25,35 @@ onMounted(() => {
     .then(data => {
       // Almacena los datos en la variable fetchedData
       fetchedData.value = data;
+      
+      // Inicia el temporizador automático
+      startAutoNextTimer();
     })
     .catch(error => {
       console.error('Error al obtener el JSON:', error);
     });
 });
+
+// Método para iniciar el temporizador automático
+function startAutoNextTimer() {
+  // Reinicia el temporizador si ya está en marcha
+  if (autoNextTimer) {
+    clearTimeout(autoNextTimer);
+  }
+
+  // Configura el temporizador para avanzar a la siguiente pregunta después de 30 segundos
+  autoNextTimer = setTimeout(() => {
+    nextQuestion();
+  }, 30000);
+}
+
+// Método para avanzar a la siguiente pregunta
+function nextQuestion() {
+  currentQuestionIndex.value += 1;
+  
+  // Inicia el temporizador automático para la siguiente pregunta
+  startAutoNextTimer();
+}
 </script>
 
 <template>
@@ -55,7 +82,7 @@ onMounted(() => {
           <img :src="fetchedData.preguntas[currentQuestionIndex].imagen" alt="">
           <div class="respostes">
             <!-- Itera sobre las respuestas y crea botones -->
-            <button v-for="(respuesta, i) in fetchedData.preguntas[currentQuestionIndex].respuestas" :key="i" class="resposta">
+            <button v-for="(respuesta, i) in fetchedData.preguntas[currentQuestionIndex].respuestas" :key="i" class="resposta" @click="() => readAnswer(i)">
               {{ respuesta.opcion }}
             </button>
           </div>
@@ -75,10 +102,23 @@ onMounted(() => {
 
 <script>
 export default {
+  data() {
+    return {
+      respuestas: [] // Array para almacenar las respuestas seleccionadas
+    };
+  },
   methods: {
-    // Método para avanzar a la siguiente pregunta
-    nextQuestion() {
-      currentQuestionIndex.value += 1;
+    // Método para leer la respuesta seleccionada
+    readAnswer(respuestaIndex) {
+      const preguntaIndex = currentQuestionIndex.value;
+      const pregunta = fetchedData.value.preguntas[preguntaIndex].enunciado;
+      const respuesta = fetchedData.value.preguntas[preguntaIndex].respuestas[respuestaIndex].opcion;
+      
+      // Guarda la pregunta y respuesta seleccionada en el array respuestas
+      this.respuestas.push({ pregunta, respuesta });
+      
+      // Muestra el array por consola
+      console.log(this.respuestas);
     }
   }
 };
