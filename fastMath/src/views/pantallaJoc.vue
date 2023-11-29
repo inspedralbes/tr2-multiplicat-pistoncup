@@ -57,21 +57,13 @@ function nextQuestion() {
 </script>
 
 <template>
-  <div>
-    <nav class="navbar">
-      <ul>
-        <li><router-link to="/">Inicio</router-link></li>
-        <li><router-link to="/contacto">Contacto</router-link></li>
-      </ul>
-    </nav>
-    <h1>hola</h1>
-
+    
     <!-- Verifica si los datos han sido obtenidos -->
-    <div v-if="fetchedData">
-      <div class="granContenidor">
+    <div class="granContenidor" v-if="fetchedData">
         <div class="canva">
+          <h1>canva</h1>
           <canvas>
-            <!-- Puedes añadir contenido al canvas si es necesario -->
+            
           </canvas>
         </div>
 
@@ -96,8 +88,6 @@ function nextQuestion() {
           <h1>¡Fin del cuestionario!</h1>
         </div>
       </div>
-    </div>
-  </div>
 </template>
 
 <script>
