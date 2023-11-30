@@ -27,6 +27,7 @@ class PreguntesController extends Controller
             'resposta2' => 'required',
             'resposta3' => 'required',
             'resposta4' => 'required',
+            'correcta' => 'required',
         ]);
 
         return Preguntes::create($request->all());

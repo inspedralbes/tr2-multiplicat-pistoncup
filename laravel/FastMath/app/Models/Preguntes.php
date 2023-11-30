@@ -18,5 +18,6 @@ class Preguntes extends Model
         'resposta2',
         'resposta3',
         'resposta4',
+        'correcta',
     ];
 }
