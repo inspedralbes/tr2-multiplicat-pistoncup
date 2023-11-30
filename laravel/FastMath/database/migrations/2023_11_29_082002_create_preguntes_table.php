@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('resposta2');
             $table->string('resposta3');
             $table->string('resposta4');
+            $table->string('correcta');
             $table->timestamps();
         });
     }
