@@ -1,0 +1,40 @@
+
+:root {
+  --lightGray: #B1B2B5;
+  --darkGray:#262626;
+  --grayPregunta: #404040;
+  --grayResposta: #B1B2B5;
+  --black: #0d0d0d;
+  --darkRed: #99222d;
+  --yellow: #deb53d;
+}
+
+
+
+@media (min-width: 1024px) {
+
+
+   #app{
+    background-color: var(--darkGray);
+   }
+
+  .p-3{
+    background-color: var(--lightGray);
+  }
+
+  .granContenidor{
+    width: 100%;
+    margin: auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background-color: var(--darkGray);
+  }
+
+  .pregunta{
+    background-color: var(--lightGray);
+    padding: 20px;
+    border-radius: 20px;
+  }
+  
+}
