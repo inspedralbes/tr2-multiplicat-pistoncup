@@ -1,6 +1,8 @@
 @import './base.css';
 
-
+:root {
+  --lightGray: #B1B2B5;
+}
 
 a,
 .green {
@@ -17,6 +19,10 @@ a,
 
 @media (min-width: 1024px) {
 
+  .p-3{
+    background-color: var(--lightGray);
+  }
+
   .granContenidor{
     width: 100%;
     margin: auto;
@@ -26,10 +32,9 @@ a,
   }
 
   .pregunta{
-    background-color: gray;
+    background-color: var(--color-variable);
     padding: 20px;
     border-radius: 20px;
-
   }
   
 }
