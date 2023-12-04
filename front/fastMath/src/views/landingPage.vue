@@ -1,20 +1,22 @@
 <template>
-  <div>
-    <div class="formulari">
-      <div>
-        <label for="pilots">Selecciona un piloto de Fórmula Uno:</label>
-        <select v-model="selectedPilot" id="pilots" name="pilots" size="1">
-          <option v-for="pilot in fetchedData" :key="pilot.id" :value="pilot.pilot_name">
-            {{ pilot.pilot_name }}
-          </option>
-        </select>
-        <br>
-        <button id="add_user" @click="unirmePartida" class="play-button">Jugar</button>
-        <br>
-        <button class="test-button" type="button">Prueba</button>
+  <body>
+    <div class="todo">
+      <div class="formulari">
+        <div>
+          <label for="pilots">Selecciona un piloto de Fórmula Uno:</label>
+          <select v-model="selectedPilot" id="pilots" name="pilots" size="1">
+            <option v-for="pilot in fetchedData" :key="pilot.id" :value="pilot.pilot_name">
+              {{ pilot.pilot_name }}
+            </option>
+          </select>
+          <br>
+          <button id="add_user" @click="unirmePartida" class="play-button">Jugar</button>
+          <br>
+          <button class="test-button" type="button">Prueba</button>
+        </div>
       </div>
     </div>
-  </div>
+  </body>
 </template>
 
 <script>
@@ -62,15 +64,22 @@ export default {
 
 <style scoped>
 body {
-  background-image: url("https://media.istockphoto.com/id/1214704318/es/vector/habitaci%C3%B3n-en-blanco-y-negro.jpg?s=612x612&w=0&k=20&c=-s2L7kc5FGJliczGY-RPVqwfK5j85ZIsQqYRqh1vuTA=");
-  background-repeat: no-repeat;
-  background-size: cover;
+
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   margin: 0;
+
   /* Elimina el margen predeterminado del body */
+}
+
+.todo {
+  width: 100%;
+  height: 100%;
+  background-image: url("https://media.istockphoto.com/id/1214704318/es/vector/habitaci%C3%B3n-en-blanco-y-negro.jpg?s=612x612&w=0&k=20&c=-s2L7kc5FGJliczGY-RPVqwfK5j85ZIsQqYRqh1vuTA=");
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .formulari {
@@ -83,6 +92,8 @@ body {
   /* Borde gris oscuro */
   width: 300px;
   /* Ancho del formulario */
+  margin: auto;
+  margin-top: 25vh;
 }
 
 label {
