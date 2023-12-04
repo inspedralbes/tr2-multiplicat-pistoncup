@@ -71,25 +71,25 @@
   
   .carrusel {
     display: flex;
-    animation: scrollCarrusel 50s linear infinite; /* Ajusta la duración según tu preferencia */
+    animation: scrollCarrusel 50s linear infinite; 
   }
   
   .posicion {
-    /* Tu estilo para cada posición */
+    
     margin-right: 10px;
   }
   
-  .numero {
-    /* Estilo para el número */
+   .numero {
+    
   }
   
   .punto {
-    /* Estilo para el punto */
+    
   }
   
   .punto-verde {
-    /* Estilo para el punto verde */
-  }
+    
+  } 
   
   @keyframes scrollCarrusel {
     from {
@@ -99,8 +99,4 @@
       transform: translateX(-100%);
     }
   }
-  
-  
-
-  
 }

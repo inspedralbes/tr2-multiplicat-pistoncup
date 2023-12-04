@@ -3,6 +3,7 @@
 
   <div id="graellaPosicions" v-if="fetchedData">
     <div id="cont">
+      <h3>FM {{ `Pregunta ${currentQuestionIndex + 1}/${fetchedData.preguntas.length}` }}</h3>
 
     </div>
     <div id="barraPosiciones" v-if="fetchedData">
@@ -32,31 +33,31 @@
     </div>
 
     <div>
-    <ul>
-      <li v-for="pregunta in preguntas" :key="pregunta.id">
-        {{ pregunta.enunciat }}
-      </li>
-    </ul>
-  </div>
-    <div class="pregunta" v-if="fetchedData && fetchedData.preguntas.length > 0">
-      <h1>{{ `Pregunta ${currentQuestionIndex + 1}/${fetchedData.preguntes.length}` }}</h1>
+      <div class="pregunta" v-if="preguntas.length > 0">
+        <h1>{{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h1>
 
-      <h1>{{ fetchedData.preguntes[currentQuestionIndex].enunciat }}</h1>
-      <img :src="fetchedData.preguntes[currentQuestionIndex].imatge" alt="">
-      <div class="respostes">
-        <button v-for="(respuesta, i) in [
-          fetchedData.preguntes[currentQuestionIndex].resposta1,
-          fetchedData.preguntes[currentQuestionIndex].resposta2,
-          fetchedData.preguntes[currentQuestionIndex].resposta3,
-          fetchedData.preguntes[currentQuestionIndex].resposta4
-        ]" :key="i" class="resposta" @click="readAnswer(i)">
-          {{ respuesta }}
-        </button>
+        <h1>{{ preguntas[currentQuestionIndex].enunciat }}</h1>
+        <img :src="preguntas[currentQuestionIndex].imatge" alt="">
+        <div class="respostes">
+          <button :key="i" class="resposta" @click="readAnswer(i)">
+            {{ preguntas[currentQuestionIndex].resposta1 }}
+          </button>
+          <button :key="i" class="resposta" @click="readAnswer(i)">
+            {{ preguntas[currentQuestionIndex].resposta2 }}
+          </button>
+          <button :key="i" class="resposta" @click="readAnswer(i)">
+            {{ preguntas[currentQuestionIndex].resposta3 }}
+          </button>
+          <button :key="i" class="resposta" @click="readAnswer(i)">
+            {{ preguntas[currentQuestionIndex].resposta4 }}
+          </button>
+        </div>
+        <button @click="nextQuestion">Siguiente Pregunta</button>
       </div>
-      <button @click="nextQuestion">Siguiente Pregunta</button>
+      <div v-else>
+        <h1>¡Fin del cuestionario!</h1>
+      </div>
     </div>
-
-
   </div>
 </template>
 
@@ -69,9 +70,11 @@ export default {
   data() {
     return {
       preguntas: [],
+      currentQuestionIndex: 0,
+      autoNextTimer: null,
     };
   },
- 
+
   components: {
     navBar,
   },
@@ -99,14 +102,14 @@ export default {
     },
 
     nextQuestion() {
-      this.currentQuestionIndex += 1;
+      this.currentQuestionIndex = (this.currentQuestionIndex + 1) % this.preguntas.length;
       this.startAutoNextTimer();
     },
 
     readAnswer(respuestaIndex) {
       const preguntaIndex = this.currentQuestionIndex;
-      const pregunta = this.fetchedData.preguntas[preguntaIndex].enunciado;
-      const respuesta = this.fetchedData.preguntas[preguntaIndex].respuestas[respuestaIndex].opcion;
+      const pregunta = this.preguntas[currentQuestionIndex].enunciat;
+      const respuesta = this.preguntas[currentQuestionIndex].resposta;
       this.respuestas.push({ pregunta, respuesta });
       console.log(this.respuestas);
     },
@@ -119,10 +122,106 @@ export default {
 
   // Usa el gancho de ciclo de vida 'mounted'
   mounted() {
-    this.onMounted();
     this.startCarousel();
     this.fetchPreguntas();
 
   },
 };
 </script>
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Source+Code+Pro:wght@800&display=swap');
+
+:root {
+  --lightGray: #B1B2B5;
+  --darkGray: #262626;
+  --grayPregunta: #404040;
+  --grayResposta: #B1B2B5;
+  --black: #0d0d0d;
+  --darkRed: #99222d;
+  --yellow: #deb53d;
+  font-family: 'Lato', sans-serif;
+}
+
+
+
+@media (min-width: 1024px) {
+
+  body {
+    margin: 0;
+    background-color: var(--darkGray);
+  }
+
+
+  nav {
+    background-color: var(--lightGray);
+    margin: 0;
+
+  }
+
+  nav h1 {
+    margin: 0;
+  }
+
+  .granContenidor {
+    width: 97%;
+    margin: auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background-color: var(--darkGray);
+  }
+
+  .pregunta {
+    color: white;
+    background-color: var(--grayPregunta);
+    padding: 20px;
+    border-radius: 20px;
+    border: 4px solid var(--darkRed);
+  }
+
+  #graellaPosicions {
+    display: grid;
+    grid-template-columns: .1fr 1fr;
+    grid-gap: 20px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+  }
+
+  #cont {
+    background-color: var(--black);
+    color: white;
+    font-size: .6em;
+  }
+
+  #barraPosiciones {
+    overflow: hidden;
+    color: white;
+  }
+
+  .carrusel-container {
+    display: flex;
+  }
+
+  .carrusel {
+    display: flex;
+    animation: scrollCarrusel 50s linear infinite;
+    /* Ajusta la duración según tu preferencia */
+  }
+
+  .posicion {
+    /* Tu estilo para cada posición */
+    margin-right: 10px;
+  }
+
+  
+
+  @keyframes scrollCarrusel {
+    from {
+      transform: translateX(90%);
+    }
+
+    to {
+      transform: translateX(-100%);
+    }
+  }
+}
+</style>
