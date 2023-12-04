@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pilots;
 use Illuminate\Http\Request;
 
 class PilotsController extends Controller
