@@ -1,4 +1,7 @@
 <template>
+  <body>
+    
+  
   <navBar />
 
   <div id="graellaPosicions" v-if="pilots.length > 0">
@@ -58,6 +61,7 @@
       </div>
     </div>
   </div>
+</body>
 </template>
 
 
@@ -142,19 +146,7 @@ export default {
 };
 </script>
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Source+Code+Pro:wght@800&display=swap');
 
-
-* {
-  --lightGray: #B1B2B5;
-  --darkGray: #262626;
-  --grayPregunta: #404040;
-  --grayResposta: #B1B2B5;
-  --black: #0d0d0d;
-  --darkRed: #99222d;
-  --yellow: #deb53d;
-  font-family: 'Lato', sans-serif;
-}
 
 
 
