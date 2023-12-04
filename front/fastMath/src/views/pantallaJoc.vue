@@ -1,22 +1,21 @@
 <template>
   <navBar />
 
-  <div id="graellaPosicions" v-if="fetchedData">
-    <div id="cont">
-      <h3>FM {{ `Pregunta ${currentQuestionIndex + 1}/${fetchedData.preguntas.length}` }}</h3>
-
-    </div>
-    <div id="barraPosiciones" v-if="fetchedData">
-      <div class="carrusel-container">
-        <div class="carrusel" ref="carrusel">
-          <div class="posicion" v-for="(posicion, i) in fetchedData.preguntas" :key="i">
-            <div class="numero">{{ i + 1 }}</div>
-            <div class="punto" :class="{ 'punto-verde': i < currentQuestionIndex }"></div>
+  <div id="graellaPosicions" v-if="pilots.length > 0">
+      <div id="cont">
+        <h3>FM {{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h3>
+      </div>
+      <div id="barraPosiciones" v-if="pilots.length">
+        <div class="carrusel-container">
+          <div class="carrusel" ref="carrusel">
+            <div class="posicion" v-for="(piloto, i) in pilots" :key="i">
+              <div class="numero">{{ i + 1 }}</div>
+              <div class="nombre">{{ piloto.pilot_name }}</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
 
   <div class="granContenidor">
@@ -70,6 +69,8 @@ export default {
   data() {
     return {
       preguntas: [],
+      pilots: [],
+      currentPilotIndex: 0,
       currentQuestionIndex: 0,
       autoNextTimer: null,
     };
@@ -88,6 +89,18 @@ export default {
         }
         const data = await response.json();
         this.preguntas = data;
+      } catch (error) {
+        console.error('Error fetching preguntas:', error);
+      }
+    },
+    async fetchPilots() {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/pilots');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        this.pilots = data;
       } catch (error) {
         console.error('Error fetching preguntas:', error);
       }
@@ -115,8 +128,8 @@ export default {
     },
     startCarousel() {
       setInterval(() => {
-        this.currentQuestionIndex = (this.currentQuestionIndex + 1) % this.fetchedData.preguntas.length;
-      }, 5000); // Ajusta el tiempo de cambio de pregunta según tu preferencia
+        this.currentPilotIndex = (this.currentPilotIndex + 1) % this.pilots.length;
+      }, 5000);
     },
   },
 
@@ -124,14 +137,15 @@ export default {
   mounted() {
     this.startCarousel();
     this.fetchPreguntas();
-
+    this.fetchPilots();
   },
 };
 </script>
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Source+Code+Pro:wght@800&display=swap');
 
-:root {
+
+* {
   --lightGray: #B1B2B5;
   --darkGray: #262626;
   --grayPregunta: #404040;
@@ -203,20 +217,21 @@ export default {
 
   .carrusel {
     display: flex;
-    animation: scrollCarrusel 50s linear infinite;
+    animation: scrollCarrusel 70s linear infinite;
     /* Ajusta la duración según tu preferencia */
   }
 
   .posicion {
     /* Tu estilo para cada posición */
-    margin-right: 10px;
+    width: 200px;
+    display: grid;
+    grid-template-columns: 0.5fr 3fr;
   }
 
-  
 
   @keyframes scrollCarrusel {
     from {
-      transform: translateX(90%);
+      transform: translateX(15%);
     }
 
     to {
