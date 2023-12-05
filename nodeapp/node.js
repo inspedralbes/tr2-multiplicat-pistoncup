@@ -12,11 +12,11 @@ var usersConectados = [];
 
 //Creem el servidor de Socket.io especificant que pot accedir qualsevol client
 const server = createServer(app);
-const io = new Server(server,{
-  cors: {
-    origin: '*', // Replace with the actual origin of your client application
-    methods: ['GET', 'POST'],
-  }
+const io = new Server(server, {
+    cors: {
+        origin: '*', // Replace with the actual origin of your client application
+        methods: ['GET', 'POST'],
+    }
 });
 
 
@@ -30,29 +30,33 @@ io.on('connection', (socket) => {
         console.log(socket.id);
 
         try {
-            
-            usersConectados.push({nuevoUsuario });
+            usersConectados.push({ id: socket.id, username: nuevoUsuario });
             
             socket.broadcast.emit('usuarioConectado', usersConectados);
+            
             for (let i = 0; i < usersConectados.length; i++) {
-                console.log("hola",usersConectados[i]);
+                console.log("hola", usersConectados[i]);
             }
 
             socket.on('disconnect', () => {
-                const usuarioConectadoIndex = usersConectados.findIndex(user=> user.username === socket.id);
+                const usuarioConectadoIndex = usersConectados.findIndex(user => user.id === socket.id);
 
-                if (usuarioConectadoIndex) {
-                    usersConectados.splice(usersConectados.indexOf(usuarioConectadoIndex), 1);
-
+                if (usuarioConectadoIndex !== -1) {
+                    usersConectados.splice(usuarioConectadoIndex, 1);
                     io.emit('arrayUsers', usersConectados);
                 }
             });
-
         } catch (error) {
             console.log(error);
         }
+        io.on('disconect', (socket) => {
+            socket.on('Usuario desconectado');
+            console.log('Usuario desconectado');
+        
+        });
     });
 });
+
 
 server.listen(3000, () => {
     console.log('Server running at http://localhost:3000');

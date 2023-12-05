@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import pantallaJoc from '../views/pantallaJoc.vue'
 import landingPage from '../views/landingPage.vue'  
+import WaitingRoom from '../views/WaitingRoom.vue';
 
 
 const router = createRouter({
@@ -15,6 +16,11 @@ const router = createRouter({
       path: '/pantallaJoc',
       name: 'pantallaJoc',
       component: pantallaJoc
+    },
+    {
+      path: '/WaitingRoom',
+      name: 'WaitingRoom',
+      component: WaitingRoom
     },
     
   ]
