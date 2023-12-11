@@ -3,7 +3,7 @@
     <div class="todo">
       <div class="formulari">
         <div>
-          <label for="pilots">Selecciona un piloto de Fórmula Uno:</label>
+          <label for="pilots">SELECCIONA UN PILOT:</label>
           <select v-model="selectedPilot" id="pilots" name="pilots" size="1">
             <option v-for="pilot in fetchedData" :key="pilot.id" :value="pilot.pilot_name">
               {{ pilot.pilot_name }}
@@ -32,7 +32,7 @@ export default {
   methods: {
     unirmePartida() {
       if (this.selectedPilot) {
-        this.$router.push('/pantallaJoc');
+        this.$router.push('/waitingRoom');
         socket.emit('Nuevo usuario', this.selectedPilot); // Envía el piloto seleccionado
         socket.emit("add_user");
       } else {
@@ -77,20 +77,20 @@ body {
 .todo {
   width: 100%;
   height: 100%;
-  background-image: url("https://media.istockphoto.com/id/1214704318/es/vector/habitaci%C3%B3n-en-blanco-y-negro.jpg?s=612x612&w=0&k=20&c=-s2L7kc5FGJliczGY-RPVqwfK5j85ZIsQqYRqh1vuTA=");
+  background-image: url("../views/img/landingGif.gif");
   background-repeat: no-repeat;
   background-size: cover;
 }
 
 .formulari {
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(97, 97, 97, 0.89);
   /* Fondo blanco algo opaco */
   border-radius: 15px;
   /* Bordes redondos */
-  border: 2px solid #555;
+  border: 2px solid #f70707;
   /* Borde gris oscuro */
-  width: 300px;
+  width: 370px;
   /* Ancho del formulario */
   margin: auto;
   margin-top: 25vh;
@@ -99,11 +99,15 @@ body {
 label {
   display: block;
   margin-bottom: 10px;
+  color: white;
+  font-size: 2.1em;
+  font-weight: bold;
+  font-variant: small-caps;
 }
 
 select {
   width: 100%;
-  padding: 8px;
+  padding: 15px;
   margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -118,27 +122,31 @@ select {
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 16px;
+  font-size: 20px;
+  font-weight: bold;
   margin: 4px 2px;
   cursor: pointer;
   border-radius: 8px;
   width: 100%;
+  border: 2px solid rgb(145, 3, 3);
   /* Ancho del botón al 100% */
 }
 
 .test-button {
-  background-color: rgb(100, 94, 94);
+  background-color: rgb(151, 150, 150);
   color: white;
   border: none;
   padding: 15px 20px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 16px;
+  font-size: 20px;
+  font-weight: bold;
   margin: 4px 2px;
   cursor: pointer;
   border-radius: 8px;
   width: 100%;
+  border: 2px solid rgb(48, 48, 48);
   /* Ancho del botón al 100% */
 }
 </style>

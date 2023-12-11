@@ -1,10 +1,8 @@
 <template>
   <body>
-    
-  
-  <navBar />
+    <navBar />
 
-  <div id="graellaPosicions" v-if="pilots.length > 0">
+    <div id="graellaPosicions" v-if="pilots.length > 0">
       <div id="cont">
         <h3>FM {{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h3>
       </div>
@@ -20,51 +18,42 @@
       </div>
     </div>
 
+    <div class="granContenidor">
+      <div class="canva">
+        <h1>canva</h1>
+        <img src="https://www.google.com/imgres?imgurl=https%3A%2F%2Fwww.thebestf1.es%2Fwp-content%2Fuploads%2F2018%2F06%2Ff1-logo-negro-750x354.jpg&tbnid=R6cdCE8NbQd5pM&vet=12ahUKEwjvydPU2OuCAxU4dqQEHUdhCQ8QMygFegQIARBN..i&imgrefurl=https%3A%2F%2Fwww.thebestf1.es%2Fla-formula-1-podria-verse-obligada-cambiar-nuevo-logotipo%2F&docid=GRG8fzSZDsiePM&w=750&h=354&q=f1%20logo&hl=ca&safe=active&ved=2ahUKEwjvydPU2OuCAxU4dqQEHUdhCQ8QMygFegQIARBN" alt="">
+        <canvas></canvas>
+      </div>
 
-  <div class="granContenidor">
+      <div>
+        <div class="pregunta" v-if="preguntas.length > 0">
+          <h1>{{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h1>
 
-
-    <div class="canva">
-      <h1>canva</h1>
-      <img
-        src="https://www.google.com/imgres?imgurl=https%3A%2F%2Fwww.thebestf1.es%2Fwp-content%2Fuploads%2F2018%2F06%2Ff1-logo-negro-750x354.jpg&tbnid=R6cdCE8NbQd5pM&vet=12ahUKEwjvydPU2OuCAxU4dqQEHUdhCQ8QMygFegQIARBN..i&imgrefurl=https%3A%2F%2Fwww.thebestf1.es%2Fla-formula-1-podria-verse-obligada-cambiar-nuevo-logotipo%2F&docid=GRG8fzSZDsiePM&w=750&h=354&q=f1%20logo&hl=ca&safe=active&ved=2ahUKEwjvydPU2OuCAxU4dqQEHUdhCQ8QMygFegQIARBN"
-        alt="">
-      <canvas>
-
-      </canvas>
-    </div>
-
-    <div>
-      <div class="pregunta" v-if="preguntas.length > 0">
-        <h1>{{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h1>
-
-        <h1>{{ preguntas[currentQuestionIndex].enunciat }}</h1>
-        <img :src="preguntas[currentQuestionIndex].imatge" alt="">
-        <div class="respostes">
-          <button :key="i" class="resposta" @click="readAnswer(i)">
-            {{ preguntas[currentQuestionIndex].resposta1 }}
-          </button>
-          <button :key="i" class="resposta" @click="readAnswer(i)">
-            {{ preguntas[currentQuestionIndex].resposta2 }}
-          </button>
-          <button :key="i" class="resposta" @click="readAnswer(i)">
-            {{ preguntas[currentQuestionIndex].resposta3 }}
-          </button>
-          <button :key="i" class="resposta" @click="readAnswer(i)">
-            {{ preguntas[currentQuestionIndex].resposta4 }}
-          </button>
+          <h1>{{ preguntas[currentQuestionIndex].enunciat }}</h1>
+          <img :src="preguntas[currentQuestionIndex].imatge" alt="">
+          <div class="respostes">
+            <button :key="1" class="resposta" @click="readAnswer(1)">
+              {{ preguntas[currentQuestionIndex].resposta1 }}
+            </button>
+            <button :key="2" class="resposta" @click="readAnswer(2)">
+              {{ preguntas[currentQuestionIndex].resposta2 }}
+            </button>
+            <button :key="3" class="resposta" @click="readAnswer(3)">
+              {{ preguntas[currentQuestionIndex].resposta3 }}
+            </button>
+            <button :key="4" class="resposta" @click="readAnswer(4)">
+              {{ preguntas[currentQuestionIndex].resposta4 }}
+            </button>
+          </div>
+          <button @click="nextQuestion">Siguiente Pregunta</button>
         </div>
-        <button @click="nextQuestion">Siguiente Pregunta</button>
-      </div>
-      <div v-else>
-        <h1>¡Fin del cuestionario!</h1>
+        <div v-else>
+          <h1>¡Fin del cuestionario!</h1>
+        </div>
       </div>
     </div>
-  </div>
-</body>
+  </body>
 </template>
-
-
 
 <script>
 import navBar from '../components/nav.vue';
@@ -77,6 +66,7 @@ export default {
       currentPilotIndex: 0,
       currentQuestionIndex: 0,
       autoNextTimer: null,
+      respuestas: [], // Agregamos el array para almacenar las respuestas
     };
   },
 
@@ -106,7 +96,7 @@ export default {
         const data = await response.json();
         this.pilots = data;
       } catch (error) {
-        console.error('Error fetching preguntas:', error);
+        console.error('Error fetching pilots:', error);
       }
     },
     startAutoNextTimer() {
@@ -125,9 +115,9 @@ export default {
 
     readAnswer(respuestaIndex) {
       const preguntaIndex = this.currentQuestionIndex;
-      const pregunta = this.preguntas[currentQuestionIndex].enunciat;
-      const respuesta = this.preguntas[currentQuestionIndex].resposta;
-      this.respuestas.push({ pregunta, respuesta });
+      const pregunta = this.preguntas[preguntaIndex].enunciat;
+      const respuesta = this.preguntas[preguntaIndex]['resposta' + respuestaIndex];
+      this.respuestas.push({ pregunta, respuesta, respuestaIndex });
       console.log(this.respuestas);
     },
     startCarousel() {
