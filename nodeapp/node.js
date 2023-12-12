@@ -2,23 +2,21 @@ import express from 'express';
 import cors from 'cors';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
-
+import { join } from 'path';
 
 const app = express();
-//Permetem que el servidor pugui rebre peticions de qualsevol origen
 app.use(cors());
 
 var usersConectados = [];
 
-//Creem el servidor de Socket.io especificant que pot accedir qualsevol client
 const server = createServer(app);
+
 const io = new Server(server, {
     cors: {
-        origin: '*', // Replace with the actual origin of your client application
+        origin: '*',
         methods: ['GET', 'POST'],
     }
 });
-
 
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
@@ -26,38 +24,55 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
     socket.on('Nuevo usuario', (nuevoUsuario) => {
-        console.log('usuario conectado');
+        console.log('Usuario conectado');
         console.log(socket.id);
 
         try {
             usersConectados.push({ id: socket.id, username: nuevoUsuario });
-            
             socket.broadcast.emit('usuarioConectado', usersConectados);
-            
+            io.emit('arrayUsers', usersConectados);
+
             for (let i = 0; i < usersConectados.length; i++) {
-                console.log("hola", usersConectados[i]);
+                console.log("Hola", usersConectados[i]);
             }
+            appStore.updateConnectedUsers(usersConectados);
 
-            socket.on('disconnect', () => {
-                const usuarioConectadoIndex = usersConectados.findIndex(user => user.id === socket.id);
+            socket.on('disconnecting', () => {
+                // Manejar la desconexión cuando se emite el evento 'disconnecting'
+                const usuarioDesconectado = usersConectados.find(user => user.id === socket.id);
 
-                if (usuarioConectadoIndex !== -1) {
-                    usersConectados.splice(usuarioConectadoIndex, 1);
-                    io.emit('arrayUsers', usersConectados);
+                if (usuarioDesconectado) {
+                    console.log(`Usuario desconectado: ${usuarioDesconectado.username}`);
+                    const usuarioConectadoIndex = usersConectados.findIndex(user => user.id === socket.id);
+
+                    if (usuarioConectadoIndex !== -1) {
+                        usersConectados.splice(usuarioConectadoIndex, 1);
+                        io.emit('arrayUsers', usersConectados);
+                        
+                        // Llamar a la acción para actualizar usuarios conectados en Pinia
+                        appStore.updateConnectedUsers(usersConectados);
+                      }
                 }
             });
         } catch (error) {
             console.log(error);
         }
-        io.on('disconect', (socket) => {
-            socket.on('Usuario desconectado');
-            console.log('Usuario desconectado');
-        
-        });
+    });
+
+    // Mueve el manejo del evento de desconexión aquí, fuera del callback de conexión
+    socket.on('disconnect', () => {
+        const usuarioConectadoIndex = usersConectados.findIndex(user => user.id === socket.id);
+
+        if (usuarioConectadoIndex !== -1) {
+            usersConectados.splice(usuarioConectadoIndex, 1);
+            io.emit('arrayUsers', usersConectados);
+            
+            // Llamar a la acción para actualizar usuarios conectados en Pinia
+            appStore.updateConnectedUsers(usersConectados);
+          }
     });
 });
 
-
 server.listen(3000, () => {
-    console.log('Server running at http://localhost:3000');
+    console.log('Servidor en ejecución en http://localhost:3000');
 });
