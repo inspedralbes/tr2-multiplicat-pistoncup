@@ -30,10 +30,12 @@ io.on('connection', (socket) => {
         try {
             usersConectados.push({ id: socket.id, username: nuevoUsuario });
             socket.broadcast.emit('usuarioConectado', usersConectados);
+            io.emit('arrayUsers', usersConectados);
 
             for (let i = 0; i < usersConectados.length; i++) {
                 console.log("Hola", usersConectados[i]);
             }
+            appStore.updateConnectedUsers(usersConectados);
 
             socket.on('disconnecting', () => {
                 // Manejar la desconexión cuando se emite el evento 'disconnecting'
@@ -42,11 +44,14 @@ io.on('connection', (socket) => {
                 if (usuarioDesconectado) {
                     console.log(`Usuario desconectado: ${usuarioDesconectado.username}`);
                     const usuarioConectadoIndex = usersConectados.findIndex(user => user.id === socket.id);
-                    
+
                     if (usuarioConectadoIndex !== -1) {
                         usersConectados.splice(usuarioConectadoIndex, 1);
                         io.emit('arrayUsers', usersConectados);
-                    }
+                        
+                        // Llamar a la acción para actualizar usuarios conectados en Pinia
+                        appStore.updateConnectedUsers(usersConectados);
+                      }
                 }
             });
         } catch (error) {
@@ -61,7 +66,10 @@ io.on('connection', (socket) => {
         if (usuarioConectadoIndex !== -1) {
             usersConectados.splice(usuarioConectadoIndex, 1);
             io.emit('arrayUsers', usersConectados);
-        }
+            
+            // Llamar a la acción para actualizar usuarios conectados en Pinia
+            appStore.updateConnectedUsers(usersConectados);
+          }
     });
 });
 

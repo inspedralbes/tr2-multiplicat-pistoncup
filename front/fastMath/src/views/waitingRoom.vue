@@ -13,13 +13,15 @@
 </template>
   
 <script>
+import { useAppStore } from '../stores/app.js';
 import { socket } from '../socket.js';
 
 export default {
-    data() {
-        return {
-            users: [],
-        };
+    computed: {
+        users() {
+            const appStore = useAppStore();
+            return appStore.connectedUsers;
+        },
     },
     methods: {
         unirmePartida() {
@@ -27,13 +29,16 @@ export default {
         },
     },
     mounted() {
-        // Escuchar cambios en la lista de usuarios conectados
+        const appStore = useAppStore();
+
         socket.on('arrayUsers', (users) => {
-            this.users = users;
+            // Actualiza la lista de usuarios en la tienda Pinia
+            appStore.setUsers(users);
         });
     },
 };
 </script>
+  
 <style scoped>
 body {
     display: flex;
@@ -90,6 +95,7 @@ ul li {
     padding: 15px 20px;
     text-align: center;
     text-decoration: none;
+    font-weight: bold;
     display: inline-block;
     font-size: 16px;
     margin: 4px 2px;

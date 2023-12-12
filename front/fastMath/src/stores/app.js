@@ -6,7 +6,6 @@ export const useAppStore = defineStore('app', {
     loginInfo: {
       loggedIn: false,
       username: '',
-      image: '',
     },
     connectedUsers: [],
   }),
@@ -14,7 +13,6 @@ export const useAppStore = defineStore('app', {
     setLoginInfo({ loggedIn, username, image }) {
       this.loginInfo.loggedIn = loggedIn;
       this.loginInfo.username = username;
-      this.loginInfo.image = image;
     },
     isLoggedIn() {
       return this.loginInfo.loggedIn;
@@ -22,14 +20,25 @@ export const useAppStore = defineStore('app', {
     getLoginInfo() {
       return this.loginInfo;
     },
-    addConnectedUser(user) {
-      this.connectedUsers.push(user);
-    },
-    removeConnectedUser(userId) {
-      this.connectedUsers = this.connectedUsers.filter(user => user.id !== userId);
-    },
     getConnectedUsers() {
       return this.connectedUsers;
+    },
+    setUsers(users) {
+      this.connectedUsers = users;
+    },
+
+    addUser(user) {
+      this.connectedUsers.push(user);
+    },
+
+    removeUser(userId) {
+      const index = this.connectedUsers.findIndex((user) => user.id === userId);
+      if (index !== -1) {
+        this.connectedUsers.splice(index, 1);
+      }
+    },
+    updateConnectedUsers(users) {
+      this.setUsers(users);
     },
   },
 });
