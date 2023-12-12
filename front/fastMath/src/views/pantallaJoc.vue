@@ -46,9 +46,11 @@
             </button>
           </div>
           <button @click="nextQuestion">Siguiente Pregunta</button>
+          <button v-if="currentQuestionIndex === 56" @click="goToPodiumPage">Ir al podio</button>
         </div>
         <div v-else>
           <h1>¡Fin del cuestionario!</h1>
+          
         </div>
       </div>
     </div>
@@ -109,10 +111,17 @@ export default {
     },
 
     nextQuestion() {
-      this.currentQuestionIndex = (this.currentQuestionIndex + 1) % this.preguntas.length;
+      if (this.currentQuestionIndex < this.preguntas.length - 1) {
+        this.currentQuestionIndex++;
+      } else {
+        // Si es la última pregunta, no incrementar más y mostrar el v-else
+        this.currentQuestionIndex = this.preguntas.length - 1;
+      }
       this.startAutoNextTimer();
     },
-
+    goToPodiumPage() {
+      this.$router.push('/podiumPage');
+    },
     readAnswer(respuestaIndex) {
       const preguntaIndex = this.currentQuestionIndex;
       const pregunta = this.preguntas[preguntaIndex].enunciat;
