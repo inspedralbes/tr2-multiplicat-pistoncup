@@ -28,24 +28,33 @@
         <button @click="moveImage">Move Image Up</button>
       </div>
 
-      <div class="pregunta" v-if="preguntas.length > 0">
-        <h1>{{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h1>
 
-        <h1>{{ preguntas[currentQuestionIndex].enunciat }}</h1>
-        <img :src="preguntas[currentQuestionIndex].imatge" alt="">
-        <div class="respostes">
-          <button :key="1" class="resposta" @click="readAnswer(1)">
-            {{ preguntas[currentQuestionIndex].resposta1 }}
-          </button>
-          <button :key="2" class="resposta" @click="readAnswer(2)">
-            {{ preguntas[currentQuestionIndex].resposta2 }}
-          </button>
-          <button :key="3" class="resposta" @click="readAnswer(3)">
-            {{ preguntas[currentQuestionIndex].resposta3 }}
-          </button>
-          <button :key="4" class="resposta" @click="readAnswer(4)">
-            {{ preguntas[currentQuestionIndex].resposta4 }}
-          </button>
+      <div>
+        <div class="pregunta" v-if="preguntas.length > 0">
+          <h1>{{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h1>
+
+          <h1>{{ preguntas[currentQuestionIndex].enunciat }}</h1>
+          <img :src="preguntas[currentQuestionIndex].imatge" alt="">
+          <div class="respostes">
+            <button :key="1" class="resposta" @click="readAnswer(1)">
+              {{ preguntas[currentQuestionIndex].resposta1 }}
+            </button>
+            <button :key="2" class="resposta" @click="readAnswer(2)">
+              {{ preguntas[currentQuestionIndex].resposta2 }}
+            </button>
+            <button :key="3" class="resposta" @click="readAnswer(3)">
+              {{ preguntas[currentQuestionIndex].resposta3 }}
+            </button>
+            <button :key="4" class="resposta" @click="readAnswer(4)">
+              {{ preguntas[currentQuestionIndex].resposta4 }}
+            </button>
+          </div>
+          <button @click="nextQuestion">Siguiente Pregunta</button>
+          <button v-if="currentQuestionIndex === 56" @click="goToPodiumPage">Ir al podio</button>
+        </div>
+        <div v-else>
+          <h1>¡Fin del cuestionario!</h1>
+
         </div>
         <button @click="nextQuestion">Siguiente Pregunta</button>
       </div>
@@ -117,10 +126,17 @@ export default {
     },
 
     nextQuestion() {
-      this.currentQuestionIndex = (this.currentQuestionIndex + 1) % this.preguntas.length;
+      if (this.currentQuestionIndex < this.preguntas.length - 1) {
+        this.currentQuestionIndex++;
+      } else {
+        // Si es la última pregunta, no incrementar más y mostrar el v-else
+        this.currentQuestionIndex = this.preguntas.length - 1;
+      }
       this.startAutoNextTimer();
     },
-
+    goToPodiumPage() {
+      this.$router.push('/podiumPage');
+    },
     readAnswer(respuestaIndex) {
       const preguntaIndex = this.currentQuestionIndex;
       const pregunta = this.preguntas[preguntaIndex].enunciat;
