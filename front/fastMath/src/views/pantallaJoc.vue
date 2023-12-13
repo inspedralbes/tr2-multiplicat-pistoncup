@@ -56,13 +56,9 @@
           <h1>¡Fin del cuestionario!</h1>
 
         </div>
-        <button @click="nextQuestion">Siguiente Pregunta</button>
-      </div>
-      <div v-else>
-        <h1>¡Fin del cuestionario!</h1>
-      </div>
+        </div>
 
-    </div>
+      </div>
   </body>
 </template>
 
@@ -260,15 +256,16 @@ export default {
     display: grid;
     grid-template-columns: .1fr 0.2fr 5fr;
   }
-  
+
   .color-franja {
     height: 100%;
-    width: 5px; /* Ancho de la franja vertical */
+    width: 5px;
+    /* Ancho de la franja vertical */
     margin-right: 10px;
   }
-  
-  
-   .numero {
+
+
+  .numero {
     margin-right: 10px;
   }
 
