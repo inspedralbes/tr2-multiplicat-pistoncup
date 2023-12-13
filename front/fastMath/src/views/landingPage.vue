@@ -1,7 +1,15 @@
 <template>
   <body>
     <div class="todo">
+      <header>
+        <a href="#" class="login-link">
+          <img src="../views/img/logologin.jpg" alt="Login">
+          <span class="tooltip">Login</span>
+        </a>
+      </header>
       <div class="formulari">
+        <img src="../views/img/logo_fastmath_black.png  " alt="logoFastMath">
+      
         <div>
           <label for="pilots">SELECCIONA UN PILOT:</label>
           <select v-model="selectedPilot" id="pilots" name="pilots" size="1">
@@ -12,7 +20,7 @@
           <br>
           <button id="add_user" @click="unirmePartida" class="play-button">Jugar</button>
           <br>
-          <button class="test-button" type="button">Prueba</button>
+          <button @click="unirmePrueba" class="test-button" type="button">Prueba</button>
         </div>
       </div>
     </div>
@@ -35,6 +43,13 @@ export default {
         this.$router.push('/waitingRoom');
         socket.emit('Nuevo usuario', this.selectedPilot); // Envía el piloto seleccionado
         socket.emit("add_user");
+      } else {
+        console.error('Por favor, selecciona un piloto antes de jugar.');
+      }
+    },
+    unirmePrueba(){
+      if (this.selectedPilot) {
+        this.$router.push('/pantallaPrueba');
       } else {
         console.error('Por favor, selecciona un piloto antes de jugar.');
       }
@@ -76,6 +91,39 @@ body {
   /* Elimina el margen predeterminado del body */
 }
 
+header {
+  padding: 30px;
+  position: relative; /* Agrega posición relativa para que funcione el posicionamiento absoluto */
+}
+
+header img {
+  position: absolute;
+  top: 5px; 
+  right: 10px; 
+  width: 70px; 
+  height: 70px; 
+  border-radius: 10px;
+}
+
+.tooltip {
+  position: absolute;
+  top: 100%;
+  right: 20px;
+  transform: translateX(-50%);
+  font-size: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease; /* Agrega una transición para suavizar el efecto */
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 7px;
+  border-radius: 5px;
+  pointer-events: none; /* Evita que el tooltip afecte a los eventos del enlace */
+}
+
+.login-link:hover .tooltip {
+  opacity: 1;
+}
+
 .todo {
   width: 100%;
   height: 100%;
@@ -83,7 +131,12 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
 }
-
+.formulari img {
+  margin-top: -40px;
+  width: 100%;
+  height: 100%;
+  margin-bottom: -30px;
+}
 .formulari {
   padding: 20px;
   background-color: rgba(97, 97, 97, 0.89);
@@ -95,8 +148,10 @@ body {
   width: 370px;
   /* Ancho del formulario */
   margin: auto;
-  margin-top: 25vh;
+  margin-top: 7vh;
 }
+
+
 
 label {
   display: block;

@@ -54,14 +54,8 @@
         </div>
         <div v-else>
           <h1>¡Fin del cuestionario!</h1>
-
         </div>
-        <button @click="nextQuestion">Siguiente Pregunta</button>
       </div>
-      <div v-else>
-        <h1>¡Fin del cuestionario!</h1>
-      </div>
-
     </div>
   </body>
 </template>
@@ -138,12 +132,25 @@ export default {
       this.$router.push('/podiumPage');
     },
     readAnswer(respuestaIndex) {
-      const preguntaIndex = this.currentQuestionIndex;
-      const pregunta = this.preguntas[preguntaIndex].enunciat;
+    const preguntaIndex = this.currentQuestionIndex;
+    const pregunta = this.preguntas[preguntaIndex].enunciat;
+
+    // Check if a response has already been recorded for the current question
+    const existingResponseIndex = this.respuestas.findIndex(
+      (resp) => resp.pregunta === pregunta
+    );
+
+    if (existingResponseIndex === -1) {
+      // If no response has been recorded, add the new response
       const respuesta = this.preguntas[preguntaIndex]['resposta' + respuestaIndex];
       this.respuestas.push({ pregunta, respuesta, respuestaIndex });
       console.log(this.respuestas);
-    },
+    } else {
+      // If a response has already been recorded, you may want to handle this case
+      console.log('Response already recorded for this question');
+      // You can choose to update the existing response or ignore the new click
+    }
+  },
     startCarousel() {
       setInterval(() => {
         this.currentPilotIndex = (this.currentPilotIndex + 1) % this.pilots.length;
@@ -260,15 +267,16 @@ export default {
     display: grid;
     grid-template-columns: .1fr 0.2fr 5fr;
   }
-  
+
   .color-franja {
     height: 100%;
-    width: 5px; /* Ancho de la franja vertical */
+    width: 5px;
+    /* Ancho de la franja vertical */
     margin-right: 10px;
   }
-  
-  
-   .numero {
+
+
+  .numero {
     margin-right: 10px;
   }
 

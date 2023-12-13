@@ -3,6 +3,7 @@ import pantallaJoc from '../views/pantallaJoc.vue'
 import landingPage from '../views/landingPage.vue'  
 import WaitingRoom from '../views/WaitingRoom.vue'
 import podiumPage from '../views/podiumPage.vue'
+import pantallaPrueba from '../views/pantallaPrueba.vue'
 
 
 const router = createRouter({
@@ -32,6 +33,11 @@ const router = createRouter({
       path: '/podiumPage',
       name: 'podiumPage',
       component: podiumPage
+    },
+    {
+      path: '/pantallaPrueba',
+      name: 'pantallaPrueba',
+      component: pantallaPrueba
     }
   ]
 })
