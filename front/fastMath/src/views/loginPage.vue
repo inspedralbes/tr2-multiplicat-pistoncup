@@ -1,43 +1,52 @@
 <template>
   <body>
     <div class="todo">
-      <header>
-        <div class="login-link">
-          <img @click="toLogin" src="../views/img/logologin.jpg" alt="Login">
-          <span class="tooltip">Login</span>
-        </div>
-      </header>
       <div class="formulari">
-        <img src="../views/img/logo_fastmath_black.png  " alt="logoFastMath">
-      
         <div>
-          <label for="pilots">SELECCIONA UN PILOT:</label>
-          <select v-model="selectedPilot" id="pilots" name="pilots" size="1">
-            <option v-for="pilot in fetchedData" :key="pilot.id" :value="pilot.pilot_name">
-              {{ pilot.pilot_name }}
-            </option>
-          </select>
-          <br>
-          <button id="add_user" @click="unirmePartida" class="play-button">Jugar</button>
-          <br>
-          <button @click="unirmePrueba" class="test-button" type="button">Prueba</button>
+          <h1>INICIAR SESIÓ</h1>
+          <form @submit.prevent="iniciarSesion">
+            <label for="username">usuari:</label>
+            <input v-model="username" type="text" id="username" name="username" required>
+            <br>
+            <label for="password">contrasenya:</label>
+            <input v-model="password" type="password" id="password" name="password" required>
+            <br>
+            <button type="submit" class="play-button">Iniciar Sesión</button>
+          </form>
+
+          <p>¿No tienes cuenta aún? <button @click="irRegistro" class="test-button" type="button">Registrar</button></p>
         </div>
       </div>
     </div>
   </body>
 </template>
-
+  
 <script>
 import { socket } from '../socket.js'
 export default {
-  name: 'landingPage',
+  name: 'loginPage',
   data() {
     return {
-      selectedPilot: null, // Agrega esta línea para manejar el piloto seleccionado
+      username: '',
+      password: '',
       fetchedData: [], // Agrega esta línea para almacenar los datos de los pilotos
     }
   },
   methods: {
+    iniciarSesion() {
+      // Agrega lógica de autenticación según tus necesidades
+      if (this.username && this.password) {
+        console.log(`Iniciando sesión como ${this.username}`);
+        this.$router.push('/waitingRoom');
+        socket.emit('Nuevo usuario', this.username); // Envía el nombre de usuario
+        socket.emit('add_user');
+      } else {
+        console.error('Por favor, ingresa un nombre de usuario y una contraseña.');
+      }
+    },
+    irRegistro() {
+      this.$router.push('/pantallaPrueba');
+    },
     unirmePartida() {
       if (this.selectedPilot) {
         this.$router.push('/waitingRoom');
@@ -47,10 +56,7 @@ export default {
         console.error('Por favor, selecciona un piloto antes de jugar.');
       }
     },
-    toLogin() {
-      this.$router.push('/loginPage');
-    },
-    unirmePrueba(){
+    unirmePrueba() {
       if (this.selectedPilot) {
         this.$router.push('/pantallaPrueba');
       } else {
@@ -75,13 +81,13 @@ export default {
     },
   },
   mounted() {
- 
+
 
     this.onMounted();
   },
 }
 </script>
-
+  
 <style scoped>
 body {
 
@@ -94,39 +100,6 @@ body {
   /* Elimina el margen predeterminado del body */
 }
 
-header {
-  padding: 30px;
-  position: relative; /* Agrega posición relativa para que funcione el posicionamiento absoluto */
-}
-
-header img {
-  position: absolute;
-  top: 5px; 
-  right: 10px; 
-  width: 70px; 
-  height: 70px; 
-  border-radius: 10px;
-}
-
-.tooltip {
-  position: absolute;
-  top: 100%;
-  right: 20px;
-  transform: translateX(-50%);
-  font-size: 20px;
-  opacity: 0;
-  transition: opacity 0.3s ease; /* Agrega una transición para suavizar el efecto */
-  background-color: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 7px;
-  border-radius: 5px;
-  pointer-events: none; /* Evita que el tooltip afecte a los eventos del enlace */
-}
-
-.login-link:hover .tooltip {
-  opacity: 1;
-}
-
 .todo {
   width: 100%;
   height: 100%;
@@ -134,12 +107,14 @@ header img {
   background-repeat: no-repeat;
   background-size: cover;
 }
+
 .formulari img {
   margin-top: -40px;
   width: 100%;
   height: 100%;
   margin-bottom: -30px;
 }
+
 .formulari {
   padding: 20px;
   background-color: rgba(97, 97, 97, 0.89);
@@ -151,10 +126,15 @@ header img {
   width: 370px;
   /* Ancho del formulario */
   margin: auto;
-  margin-top: 7vh;
+  margin-top: 13.5vh;
 }
 
-
+h1{
+  text-align: center;
+  font-size: 2.1em;
+  font-weight: bold;
+  font-variant: small-caps;
+}
 
 label {
   display: block;
@@ -163,6 +143,15 @@ label {
   font-size: 2.1em;
   font-weight: bold;
   font-variant: small-caps;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
 }
 
 select {

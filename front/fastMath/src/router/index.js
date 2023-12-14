@@ -4,6 +4,7 @@ import landingPage from '../views/landingPage.vue'
 import WaitingRoom from '../views/WaitingRoom.vue'
 import podiumPage from '../views/podiumPage.vue'
 import pantallaPrueba from '../views/pantallaPrueba.vue'
+import loginPage from '../views/loginPage.vue'
 
 
 const router = createRouter({
@@ -38,6 +39,11 @@ const router = createRouter({
       path: '/pantallaPrueba',
       name: 'pantallaPrueba',
       component: pantallaPrueba
+    },
+    {
+      path: '/loginPage',
+      name: 'loginPage',
+      component: loginPage
     }
   ]
 })
