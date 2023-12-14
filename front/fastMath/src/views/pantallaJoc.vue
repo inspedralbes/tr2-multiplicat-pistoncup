@@ -68,11 +68,8 @@
         </div>
         <div v-else>
           <h1>¡Fin del cuestionario!</h1>
-
         </div>
       </div>
-
-
     </div>
   </body>
 </template>
@@ -152,14 +149,26 @@ export default {
       this.$router.push('/podiumPage');
     },
     readAnswer(respuestaIndex) {
-      const preguntaIndex = this.currentQuestionIndex;
-      const pregunta = this.preguntas[preguntaIndex].enunciat;
+    const preguntaIndex = this.currentQuestionIndex;
+    const pregunta = this.preguntas[preguntaIndex].enunciat;
+
+    // Check if a response has already been recorded for the current question
+    const existingResponseIndex = this.respuestas.findIndex(
+      (resp) => resp.pregunta === pregunta
+    );
+
+    if (existingResponseIndex === -1) {
+      // If no response has been recorded, add the new response
       const respuesta = this.preguntas[preguntaIndex]['resposta' + respuestaIndex];
       this.respuestas.push({ pregunta, respuesta, respuestaIndex });
       this.selectedButton = respuestaIndex; // Marcar el botón como seleccionado
       console.log(this.respuestas);
-    },
-
+    } else {
+      // If a response has already been recorded, you may want to handle this case
+      console.log('Ya has seleccionado la respuesta');
+      // You can choose to update the existing response or ignore the new click
+    }
+  },
     showDescr() {
       this.show = true;
 
