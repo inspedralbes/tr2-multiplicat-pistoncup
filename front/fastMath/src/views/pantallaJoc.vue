@@ -4,7 +4,7 @@
 
     <div id="graellaPosicions" v-if="pilots.length > 0">
       <div id="cont">
-        <h3>FM {{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h3>
+        <h3> {{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h3>
       </div>
       <div id="barraPosiciones" v-if="pilots.length">
         <div class="carrusel-container">
@@ -22,43 +22,58 @@
 
 
     <div class="granContenidor">
+
+      <div class="descr" v-if="show">
+        <h1>Explicació</h1>
+        <p>{{ preguntas[currentQuestionIndex].explicacio }}</p>
+        <button @click="hiddenDescr">Tancar</button>
+        
+      </div>
+
       <div>
-        <canvas ref="myCanvas" width="500" height="500" style="border:1px solid #000;">
+        <canvas ref="myCanvas" width="650" height="700" style="border:1px solid #000;">
         </canvas>
-        <button @click="moveImage">Move Image Up</button>
+        
       </div>
 
 
       <div>
         <div class="pregunta" v-if="preguntas.length > 0">
+          <button @click="moveImage">Move Image Up</button>
           <h1>{{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h1>
 
           <h1>{{ preguntas[currentQuestionIndex].enunciat }}</h1>
           <img :src="preguntas[currentQuestionIndex].imatge" alt="">
           <div class="respostes">
-            <button :key="1" class="resposta" @click="readAnswer(1)">
+            <button :key="1" class="resposta" @click="readAnswer(1)" :class="{ 'selected': selectedButton === 1 }">
               {{ preguntas[currentQuestionIndex].resposta1 }}
             </button>
-            <button :key="2" class="resposta" @click="readAnswer(2)">
+
+            <button :key="2" class="resposta" @click="readAnswer(2)" :class="{ 'selected': selectedButton === 2 }">
               {{ preguntas[currentQuestionIndex].resposta2 }}
             </button>
-            <button :key="3" class="resposta" @click="readAnswer(3)">
+
+            <button :key="3" class="resposta" @click="readAnswer(3)" :class="{ 'selected': selectedButton === 3 }">
               {{ preguntas[currentQuestionIndex].resposta3 }}
             </button>
-            <button :key="4" class="resposta" @click="readAnswer(4)">
+
+            <button :key="4" class="resposta" @click="readAnswer(4)" :class="{ 'selected': selectedButton === 4 }">
               {{ preguntas[currentQuestionIndex].resposta4 }}
             </button>
           </div>
+
           <button @click="nextQuestion">Siguiente Pregunta</button>
           <button v-if="currentQuestionIndex === 56" @click="goToPodiumPage">Ir al podio</button>
+          <button id="showDescr" @click="showDescr">?</button>
         </div>
         <div v-else>
           <h1>¡Fin del cuestionario!</h1>
-
         </div>
+
         </div>
 
       </div>
+
   </body>
 </template>
 
@@ -74,6 +89,8 @@ export default {
       currentQuestionIndex: 0,
       autoNextTimer: null,
       respuestas: [], // Agregamos el array para almacenar las respuestas
+      selectedButton: false,
+      show: false,
       canvas: null,
       ctx: null,
       img: new Image(),
@@ -124,6 +141,7 @@ export default {
     nextQuestion() {
       if (this.currentQuestionIndex < this.preguntas.length - 1) {
         this.currentQuestionIndex++;
+        this.selectedButton = false; // Desmarcar el botón
       } else {
         // Si es la última pregunta, no incrementar más y mostrar el v-else
         this.currentQuestionIndex = this.preguntas.length - 1;
@@ -134,12 +152,35 @@ export default {
       this.$router.push('/podiumPage');
     },
     readAnswer(respuestaIndex) {
-      const preguntaIndex = this.currentQuestionIndex;
-      const pregunta = this.preguntas[preguntaIndex].enunciat;
+    const preguntaIndex = this.currentQuestionIndex;
+    const pregunta = this.preguntas[preguntaIndex].enunciat;
+
+    // Check if a response has already been recorded for the current question
+    const existingResponseIndex = this.respuestas.findIndex(
+      (resp) => resp.pregunta === pregunta
+    );
+
+    if (existingResponseIndex === -1) {
+      // If no response has been recorded, add the new response
       const respuesta = this.preguntas[preguntaIndex]['resposta' + respuestaIndex];
       this.respuestas.push({ pregunta, respuesta, respuestaIndex });
+      this.selectedButton = respuestaIndex; // Marcar el botón como seleccionado
       console.log(this.respuestas);
+    } else {
+      // If a response has already been recorded, you may want to handle this case
+      console.log('Ya has seleccionado la respuesta');
+      // You can choose to update the existing response or ignore the new click
+    }
+  },
+    showDescr() {
+      this.show = true;
+
     },
+
+    hiddenDescr() {
+      this.show = false;
+    },
+
     startCarousel() {
       setInterval(() => {
         this.currentPilotIndex = (this.currentPilotIndex + 1) % this.pilots.length;
@@ -204,6 +245,7 @@ export default {
   }
 
   .granContenidor {
+    position: relative;
     width: 97%;
     margin: auto;
     padding: 20px;
@@ -212,12 +254,69 @@ export default {
     background-color: var(--darkGray);
   }
 
+  .descr {
+    position: absolute;
+    font-size: .8em;
+    background-color: var(--lightGray);
+    color: var(--black);
+    padding: 20px;
+    border-radius: 20px;
+    grid-column: 1/3;
+    text-align: center;
+    width: 25%;
+    right: 40%;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7); /* Ajusta según sea necesario */
+
+  }
+
+  .dark-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Ajusta la opacidad según tu preferencia */
+    z-index: 1;
+  }
+
   .pregunta {
     color: white;
     background-color: var(--grayPregunta);
     padding: 20px;
     border-radius: 20px;
     border: 4px solid var(--darkRed);
+  }
+
+  .resposta {
+
+    font-size: 1.2em;
+  }
+
+  .resposta:hover {
+    background-color: var(--darkRed);
+    color: white;
+    transition: .5s;
+
+  }
+
+  .selected {
+    background-color: var(--darkRed);
+    color: white;
+    /* Otros estilos que desees aplicar al botón seleccionado */
+    transition: 1s;
+  }
+
+  #showDescr {
+    background-color: var(--yellow);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-weight: bolder;
+    font-size: 1.5em;
+    border: none;
+    margin: 10px;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
   }
 
   #graellaPosicions {
