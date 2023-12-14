@@ -1,7 +1,7 @@
 <template>
   <header>
     <nav>
-      <h1>FM</h1>
+      <img id="logo" src="../views/img/logo_fastmath_black.png" alt="" >
     </nav>
   </header>
 </template>
@@ -35,6 +35,10 @@ export default {
   body {
     margin: 0;
     background-color: var(--darkGray);
+  }
+
+  #logo {
+    width: 50px;
   }
 
 
