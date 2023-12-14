@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\TeamsController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PilotsController;
 use App\Http\Controllers\PreguntesController;
 use App\Http\Controllers\PlayersController;

@@ -11,7 +11,7 @@
             <label for="password">contrasenya:</label>
             <input v-model="password" type="password" id="password" name="password" required>
             <br>
-            <button type="submit" class="play-button">Iniciar Sesión</button>
+            <button type="submit" @click="iniciarSesion" class="play-button">Iniciar Sesió</button>
           </form>
 
           <p>¿No tienes cuenta aún? <button @click="irRegistro" class="test-button" type="button">Registrar</button></p>
@@ -24,22 +24,56 @@
 <script>
 import { socket } from '../socket.js'
 export default {
+  
   name: 'loginPage',
   data() {
     return {
       username: '',
       password: '',
       fetchedData: [], // Agrega esta línea para almacenar los datos de los pilotos
-    }
+    };
   },
   methods: {
     iniciarSesion() {
       // Agrega lógica de autenticación según tus necesidades
       if (this.username && this.password) {
-        console.log(`Iniciando sesión como ${this.username}`);
-        this.$router.push('/waitingRoom');
-        socket.emit('Nuevo usuario', this.username); // Envía el nombre de usuario
-        socket.emit('add_user');
+        const credentials = {
+          username: this.username,
+          password: this.password,
+        };
+
+        fetch('http://localhost:8000/api/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(credentials),
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Error al iniciar sesión.');
+            }
+            return response.json();
+          })
+          .then(jsonData => {
+            const data = jsonData.data;
+            if (data.error === 1) {
+              console.error('Error al iniciar sesión:', data.missatge);
+              // Puedes manejar el error en tu aplicación, por ejemplo, mostrando un mensaje al usuario.
+            } else {
+              // Manejar el éxito del inicio de sesión, por ejemplo, almacenar el token en localStorage.
+              localStorage.setItem('token', data.token);
+              console.log('Inicio de sesión exitoso');
+              // Redirigir a la página deseada, por ejemplo:
+              this.$router.push('/waitingRoom');
+              // Puedes emitir eventos al socket si es necesario.
+              socket.emit('Nuevo usuario', this.username);
+              socket.emit('add_user');
+            }
+          })
+          .catch(error => {
+            console.error('Error al iniciar sesión:', error);
+          });
       } else {
         console.error('Por favor, ingresa un nombre de usuario y una contraseña.');
       }
@@ -62,22 +96,6 @@ export default {
       } else {
         console.error('Por favor, selecciona un piloto antes de jugar.');
       }
-    },
-    onMounted() {
-      fetch('http://127.0.0.1:8000/api/pilots')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Error de red - ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          this.fetchedData = data;
-          // No estoy seguro de para qué se usa startAutoNextTimer(), puedes quitarlo si no es necesario
-        })
-        .catch(error => {
-          console.error('Error al obtener el JSON:', error);
-        });
     },
   },
   mounted() {
