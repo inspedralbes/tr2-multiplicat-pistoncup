@@ -23,28 +23,31 @@
 
     <div class="granContenidor">
 
-      <div class="descr" v-if="show">
+      <div class="descr" v-if="show && selectedButton">
         <h1>Explicació</h1>
         <p>{{ preguntas[currentQuestionIndex].explicacio }}</p>
         <button @click="hiddenDescr">Tancar</button>
-        
+
       </div>
 
       <div>
         <canvas ref="myCanvas" width="650" height="700" style="border:1px solid #000;">
         </canvas>
-        
+
       </div>
 
 
       <div>
         <div class="pregunta" v-if="preguntas.length > 0">
+          <h2 :class="getTimerClass()">{{ `${formatTime(timeRemaining)}` }}</h2>
+
+
           <button @click="moveImage">Move Image Up</button>
           <h1>{{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h1>
 
           <h1>{{ preguntas[currentQuestionIndex].enunciat }}</h1>
           <img :src="preguntas[currentQuestionIndex].imatge" alt="">
-          <div class="respostes">
+          <div class="respostes" v-if="timeRemaining < 11">
             <button :key="1" class="resposta" @click="readAnswer(1)" :class="{ 'selected': selectedButton === 1 }">
               {{ preguntas[currentQuestionIndex].resposta1 }}
             </button>
@@ -62,9 +65,8 @@
             </button>
           </div>
 
-          <button @click="nextQuestion">Siguiente Pregunta</button>
           <button v-if="currentQuestionIndex === 56" @click="goToPodiumPage">Ir al podio</button>
-          <button id="showDescr" @click="showDescr">?</button>
+          <button id="showDescr" @click="showDescr" v-if="selectedButton">?</button>
         </div>
         <div v-else>
           <h1>¡Fin del cuestionario!</h1>
@@ -85,13 +87,14 @@ export default {
       currentPilotIndex: 0,
       currentQuestionIndex: 0,
       autoNextTimer: null,
+      timeRemaining: 15,
       respuestas: [], // Agregamos el array para almacenar las respuestas
       selectedButton: false,
       show: false,
       canvas: null,
       ctx: null,
       img: new Image(),
-      x: 60,
+      x: 100,
       y: 450, // Initial position based on canvas and image height
     };
   },
@@ -125,50 +128,73 @@ export default {
         console.error('Error fetching pilots:', error);
       }
     },
-    startAutoNextTimer() {
-      if (this.autoNextTimer) {
-        clearTimeout(this.autoNextTimer);
+    
+
+    //--------------------------------------------------------------------- temporizador de la pregunta
+    startQuestionTimer() {
+      this.timeRemaining = 15; // reiniciar el tiempo para cada pregunta
+      if (this.questionTimer) {
+        clearInterval(this.questionTimer);
       }
-      this.autoNextTimer = setTimeout(() => {
-        this.nextQuestion();
-      }, 10000);
-      log(this.autoNextTimer);
+      this.questionTimer = setInterval(() => {
+        this.timeRemaining = Math.max(0, this.timeRemaining - 1);
+        if (this.timeRemaining === 0) {
+          // Si el tiempo llega a cero, pasar a la siguiente pregunta
+          this.nextQuestion();
+        }
+      }, 1000);
     },
 
-    nextQuestion() {
+    formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    },
+
+    getTimerClass() {
+    return {
+      'timer-red': this.timeRemaining <= 5,
+    };
+  },
+
+
+    //--------------------------------------------------------------------- pasa a la siguiente pregunta
+     nextQuestion() {
       if (this.currentQuestionIndex < this.preguntas.length - 1) {
         this.currentQuestionIndex++;
         this.selectedButton = false; // Desmarcar el botón
+        this.startQuestionTimer(); // Iniciar el temporizador para la nueva pregunta
       } else {
         // Si es la última pregunta, no incrementar más y mostrar el v-else
         this.currentQuestionIndex = this.preguntas.length - 1;
+        clearInterval(this.questionTimer); // Detener el temporizador si es la última pregunta
       }
-      this.startAutoNextTimer();
     },
-    goToPodiumPage() {
-      this.$router.push('/podiumPage');
-    },
+      
+
+
+    
     readAnswer(respuestaIndex) {
-    const preguntaIndex = this.currentQuestionIndex;
-    const pregunta = this.preguntas[preguntaIndex].enunciat;
+      const preguntaIndex = this.currentQuestionIndex;
+      const pregunta = this.preguntas[preguntaIndex].enunciat;
 
-    // Check if a response has already been recorded for the current question
-    const existingResponseIndex = this.respuestas.findIndex(
-      (resp) => resp.pregunta === pregunta
-    );
+      // Check if a response has already been recorded for the current question
+      const existingResponseIndex = this.respuestas.findIndex(
+        (resp) => resp.pregunta === pregunta
+      );
 
-    if (existingResponseIndex === -1) {
-      // If no response has been recorded, add the new response
-      const respuesta = this.preguntas[preguntaIndex]['resposta' + respuestaIndex];
-      this.respuestas.push({ pregunta, respuesta, respuestaIndex });
-      this.selectedButton = respuestaIndex; // Marcar el botón como seleccionado
-      console.log(this.respuestas);
-    } else {
-      // If a response has already been recorded, you may want to handle this case
-      console.log('Ya has seleccionado la respuesta');
-      // You can choose to update the existing response or ignore the new click
-    }
-  },
+      if (existingResponseIndex === -1) {
+        // If no response has been recorded, add the new response
+        const respuesta = this.preguntas[preguntaIndex]['resposta' + respuestaIndex];
+        this.respuestas.push({ pregunta, respuesta, respuestaIndex });
+        this.selectedButton = respuestaIndex; // Marcar el botón como seleccionado
+        console.log(this.respuestas);
+      } else {
+        // If a response has already been recorded, you may want to handle this case
+        console.log('Ya has seleccionado la respuesta');
+        // You can choose to update the existing response or ignore the new click
+      }
+    },
     showDescr() {
       this.show = true;
 
@@ -178,6 +204,10 @@ export default {
       this.show = false;
     },
 
+    goToPodiumPage() {
+      this.$router.push('/podiumPage');
+    },
+    
     startCarousel() {
       setInterval(() => {
         this.currentPilotIndex = (this.currentPilotIndex + 1) % this.pilots.length;
@@ -192,13 +222,16 @@ export default {
       this.drawImage();
     },
     generateRandomColor() {
-      const letters = '0123456789ABCDEF';
-      let color = '#';
-      for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
-      return color;
-    },
+  if (!this.randomColor) {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    this.randomColor = color; // Almacena el color generado para su uso posterior
+  }
+  return this.randomColor;
+},
 
 
   },
@@ -213,11 +246,11 @@ export default {
     this.ctx = this.canvas.getContext("2d");
 
     // Load image
-    this.img.src = 'http://127.0.0.1:5173/src/views/img/coche.png';
+    this.img.src = '/img/coche.png';
 
     // Initial draw
     this.img.onload = () => this.drawImage();
-
+    this.startQuestionTimer(); // Iniciar el temporizador al cargar la página
 
   },
 };
@@ -248,6 +281,7 @@ export default {
     padding: 20px;
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-gap: 20px;
     background-color: var(--darkGray);
   }
 
@@ -262,7 +296,7 @@ export default {
     text-align: center;
     width: 25%;
     right: 40%;
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7); /* Ajusta según sea necesario */
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
 
   }
 
@@ -273,7 +307,6 @@ export default {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    /* Ajusta la opacidad según tu preferencia */
     z-index: 1;
   }
 
@@ -283,6 +316,14 @@ export default {
     padding: 20px;
     border-radius: 20px;
     border: 4px solid var(--darkRed);
+    
+  }
+
+  .respostes{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 20px;
+    
   }
 
   .resposta {
@@ -300,8 +341,19 @@ export default {
   .selected {
     background-color: var(--darkRed);
     color: white;
-    /* Otros estilos que desees aplicar al botón seleccionado */
     transition: 1s;
+  }
+
+  .timer-red {
+  color: var(--darkRed); 
+}
+
+  canvas {
+    background-image: url(../views/img/canva.gif);
+    background-size: contain;
+    width: 100%;
+    height: 100%;
+    
   }
 
   #showDescr {
@@ -321,6 +373,7 @@ export default {
     grid-template-columns: .1fr 1fr;
     grid-gap: 20px;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+    width: 100%;
   }
 
   #cont {
@@ -341,7 +394,6 @@ export default {
   .carrusel {
     display: flex;
     animation: scrollCarrusel 70s linear infinite;
-    /* Ajusta la duración según tu preferencia */
   }
 
 
@@ -356,7 +408,6 @@ export default {
   .color-franja {
     height: 100%;
     width: 5px;
-    /* Ancho de la franja vertical */
     margin-right: 10px;
   }
 
