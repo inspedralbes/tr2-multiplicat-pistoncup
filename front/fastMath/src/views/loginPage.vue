@@ -42,7 +42,7 @@ export default {
           password: this.password,
         };
 
-        fetch('http://localhost:8000/api/users', {
+        fetch('http://localhost:8000/api/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
