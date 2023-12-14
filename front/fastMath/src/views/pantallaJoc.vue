@@ -69,8 +69,11 @@
         <div v-else>
           <h1>¡Fin del cuestionario!</h1>
         </div>
+
+        </div>
+
       </div>
-    </div>
+
   </body>
 </template>
 
