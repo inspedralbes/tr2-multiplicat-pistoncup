@@ -17,24 +17,28 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required'
         ]);
-
+    
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password)
         ]);
-        
+    
+        // Generar token de acceso personal para el usuario recién registrado
         $token = $user->createToken('auth_token')->plainTextToken;
-
+    
+        // Actualizar el campo 'token' en lugar de 'current_token'
+        $user->update(['token' => $token]);
+    
         $response = [
             'user' => $user,
             'token' => $token
         ];
-
+    
         return response($response, 201);
     }
-
-    public function login(Request $request)
+    
+public function login(Request $request)
 {
     $credentials = $request->validate([
         'email' => 'required|email',
@@ -45,6 +49,9 @@ class AuthController extends Controller
 
     if ($user && Hash::check($credentials['password'], $user->password)) {
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Actualiza el campo 'token' en lugar de 'current_token'
+        $user->update(['token' => $token]);
 
         $response = [
             'user' => $user,
@@ -58,7 +65,6 @@ class AuthController extends Controller
         'message' => 'Invalid credentials'
     ], 401);
 }
-
     public function logout(Request $request)
     {
         auth()->user()->tokens()->delete();
