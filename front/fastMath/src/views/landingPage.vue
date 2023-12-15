@@ -29,6 +29,7 @@
 
 <script>
 import { socket } from '../socket.js'
+import { useAppStore } from '../stores/app.js';
 export default {
   name: 'landingPage',
   data() {
@@ -40,9 +41,14 @@ export default {
   methods: {
     unirmePartida() {
       if (this.selectedPilot) {
-        this.$router.push('/waitingRoom');
+        
         socket.emit('Nuevo usuario', this.selectedPilot); // Envía el piloto seleccionado
         socket.emit("add_user");
+        //guardo los datos en pinia
+        const appStore = useAppStore();
+        appStore.setLoginInfo(true,this.selectedPilot);
+
+        this.$router.push('/waitingRoom');
       } else {
         console.error('Por favor, selecciona un piloto antes de jugar.');
       }
