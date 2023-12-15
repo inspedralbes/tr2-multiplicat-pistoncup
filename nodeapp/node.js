@@ -27,15 +27,35 @@ io.on('connection', (socket) => {
         console.log('Usuario conectado');
         console.log(socket.id);
 
+       
+        //hay que hacer un socket on solicitud_inicio que sea simplemente un 
+        //emit a TODO EL MUNDO con el eventeo inicia_partida
+        socket.on('solicitud_inicio', () => {
+            console.log("Solicitud de inicio de partida");
+            let contador = 5;
+        
+            const intervalo = setInterval(() => {
+                io.emit('cuenta_atras', contador);
+                contador--;
+        
+                if (contador < 0) {
+                    clearInterval(intervalo);
+                    io.emit('inicio_partida');
+                }
+            }, 1000);
+        });
+
+
+
         try {
             usersConectados.push({ id: socket.id, username: nuevoUsuario });
-            socket.broadcast.emit('usuarioConectado', usersConectados);
+            //socket.broadcast.emit('usuarioConectado', usersConectados);
             io.emit('arrayUsers', usersConectados);
 
             for (let i = 0; i < usersConectados.length; i++) {
                 console.log("Hola", usersConectados[i]);
             }
-            appStore.updateConnectedUsers(usersConectados);
+      
 
             socket.on('disconnecting', () => {
                 // Manejar la desconexión cuando se emite el evento 'disconnecting'
@@ -49,8 +69,7 @@ io.on('connection', (socket) => {
                         usersConectados.splice(usuarioConectadoIndex, 1);
                         io.emit('arrayUsers', usersConectados);
                         
-                        // Llamar a la acción para actualizar usuarios conectados en Pinia
-                        appStore.updateConnectedUsers(usersConectados);
+                      
                       }
                 }
             });
@@ -67,8 +86,7 @@ io.on('connection', (socket) => {
             usersConectados.splice(usuarioConectadoIndex, 1);
             io.emit('arrayUsers', usersConectados);
             
-            // Llamar a la acción para actualizar usuarios conectados en Pinia
-            appStore.updateConnectedUsers(usersConectados);
+         
           }
     });
 });

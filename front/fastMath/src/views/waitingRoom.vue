@@ -3,6 +3,7 @@
         <div class="todo">
             <div class="container">
                 <h1>Lista de usuarios conectados:</h1>
+                <h1>{{ contador }}</h1>
                 <ul>
                     <li v-for="user in users" :key="user.id">{{ user.username }}</li>
                 </ul>
@@ -17,6 +18,12 @@ import { useAppStore } from '../stores/app.js';
 import { socket } from '../socket.js';
 
 export default {
+    name: 'waitingRoom',
+    data() {
+        return {
+            contador: 5,
+        };
+    },
     computed: {
         users() {
             const appStore = useAppStore();
@@ -25,15 +32,21 @@ export default {
     },
     methods: {
         unirmePartida() {
-            this.$router.push('/pantallaJoc');
+            //Aqui hago un emit solicitud_inicio
+            console.log('Enviando solicitud de inicio');
+            socket.emit('solicitud_inicio');
         },
+        
     },
     mounted() {
-        const appStore = useAppStore();
-
-        socket.on('arrayUsers', (users) => {
-            // Actualiza la lista de usuarios en la tienda Pinia
-            appStore.setUsers(users);
+        socket.on('cuenta_atras', (contador) => {
+            console.log('Recibido evento de contador');
+            this.contador = contador;
+        });
+        //aqui tengo un socket_on inicio_partida que me hara el push
+        socket.on('inicio_partida', () => {
+            console.log('Recibido evento de inicio de partida');
+            this.$router.push('/pantallaJoc');
         });
     },
 };
