@@ -4,7 +4,8 @@
 
     <div id="graellaPosicions" v-if="pilots.length > 0">
       <div id="cont">
-        <h3> {{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h3>
+       <div id="logo"><img src="/img/logo_text.png" alt=""></div>
+        <div id="contQuestions"><h3> {{ `${currentQuestionIndex + 1}/${preguntas.length}` }}</h3></div>
       </div>
       <div id="barraPosiciones" v-if="pilots.length">
         <div class="carrusel-container">
@@ -349,6 +350,17 @@ export default {
 
   .timer-red {
   color: var(--darkRed); 
+  animation: blink .3s infinite alternate; /* ajusta la duración según tus preferencias */
+}
+
+@keyframes blink {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.5; /* ajusta la opacidad según tus preferencias */
+    color: var(--yellow);
+  }
 }
 
   canvas {
@@ -357,7 +369,10 @@ export default {
     width: 100%;
     height: 100%;
     
+    
   }
+
+  
 
   #showDescr {
     background-color: var(--yellow);
@@ -373,9 +388,8 @@ export default {
 
   #graellaPosicions {
     display: grid;
-    grid-template-columns: .1fr 1fr;
-    grid-gap: 20px;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+    grid-template-columns: .15fr 1fr;
+    box-shadow: rgba(153, 34, 45, 0.16) 0px 10px 36px 0px, rgba(153, 34, 45, 0.06) 0px 0px 0px 1px;
     width: 100%;
   }
 
@@ -383,11 +397,34 @@ export default {
     background-color: var(--black);
     color: white;
     font-size: .6em;
+    display: grid;
+    grid-template-columns: .3fr 1fr;
+    padding: 5px;
+  }
+
+  #contQuestions{
+    text-align: right;
+    padding-right: 15px;
+    padding-top: 2px;
+    font-size: 1.5em;
+  }
+
+  #contQuestions h3{
+    margin: 0;
+    padding-top: 5px;
+  }
+
+  #logo img{
+    width: 55px;
+    padding: 5px;
   }
 
   #barraPosiciones {
     overflow: hidden;
     color: white;
+    padding-top: 10px;
+    background-color: var(--grayPregunta);
+    padding-left: 5px;
   }
 
   .carrusel-container {
