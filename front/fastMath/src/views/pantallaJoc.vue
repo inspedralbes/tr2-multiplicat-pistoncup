@@ -7,13 +7,14 @@
        <div id="logo"><img src="/img/logo_text.png" alt=""></div>
         <div id="contQuestions"><h3> {{ `${currentQuestionIndex + 1}/${preguntas.length}` }}</h3></div>
       </div>
-      <div id="barraPosiciones" v-if="pilots.length">
+      <div id="barraPosiciones" v-if="connectedUsers.length">
         <div class="carrusel-container">
           <div class="carrusel" ref="carrusel">
-            <div class="posicion" v-for="(piloto, i) in pilots" :key="i">
+            <div class="posicion" v-for="(user, i) in connectedUsers" :key="i">
               <div class="color-franja" :style="{ backgroundColor: generateRandomColor() }"></div>
               <div class="numero">{{ i + 1 }}</div>
-              <div class="nombre">{{ piloto.pilot_name }}</div>
+              <div class="nombre">{{ user.username }}</div> <!-- or user.pilot_name, based on your data structure -->
+              <!-- Add more properties if needed -->
             </div>
           </div>
         </div>
@@ -82,6 +83,8 @@
 
 <script>
 import navBar from '../components/nav.vue';
+import { useAppStore } from '../stores/app.js'; // Import your store
+
 
 export default {
   data() {
@@ -105,6 +108,14 @@ export default {
 
   components: {
     navBar,
+  },
+
+  computed: {
+    connectedUsers() {
+      const appStore = useAppStore();
+      return appStore.connectedUsers;
+      
+    },
   },
 
   methods: {
@@ -135,6 +146,7 @@ export default {
     
 
     //--------------------------------------------------------------------- temporizador de la pregunta
+    
     startQuestionTimer() {
       this.timeRemaining = 15; // reiniciar el tiempo para cada pregunta
       if (this.questionTimer) {
@@ -167,6 +179,7 @@ export default {
       if (this.currentQuestionIndex < this.preguntas.length - 1) {
         this.currentQuestionIndex++;
         this.selectedButton = false; // Desmarcar el botón
+        this.show=false;
         this.startQuestionTimer(); // Iniciar el temporizador para la nueva pregunta
       } else {
         // Si es la última pregunta, no incrementar más y mostrar el v-else
@@ -213,10 +226,25 @@ export default {
     },
     
     startCarousel() {
-      setInterval(() => {
-        this.currentPilotIndex = (this.currentPilotIndex + 1) % this.pilots.length;
-      }, 5000);
-    },
+    setInterval(() => {
+      // Obtén el usuario actual del carrusel
+      const currentUser = this.connectedUsers[this.currentPilotIndex];
+
+      // Asigna la propiedad 'coche' a cada usuario (ajusta la lógica según tus necesidades)
+      currentUser.coche = currentUser.id % 2 === 0 ? '1.png' : '2.png';
+
+      // Load image for the current user's car
+      const carImage = new Image();
+      carImage.src = `/img/coches/${currentUser.coche}`;
+
+      // Limpiar el canvas y dibujar la nueva imagen del coche
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.drawImage(carImage, this.x, this.y);
+
+      // Incrementa el índice para el próximo usuario
+      this.currentPilotIndex = (this.currentPilotIndex + 1) % this.connectedUsers.length;
+    }, 5000);
+  },
     drawImage() {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.ctx.drawImage(this.img, this.x, this.y);
@@ -250,11 +278,10 @@ export default {
     this.ctx = this.canvas.getContext("2d");
 
     // Load image
-    this.img.src = '/img/coche.png';
 
     // Initial draw
-    this.img.onload = () => this.drawImage();
     this.startQuestionTimer(); // Iniciar el temporizador al cargar la página
+    
 
   },
 };
@@ -301,6 +328,7 @@ export default {
     width: 25%;
     right: 40%;
     box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+    z-index: 1;
 
   }
 
@@ -320,6 +348,7 @@ export default {
     padding: 20px;
     border-radius: 20px;
     border: 4px solid var(--darkRed);
+    z-index: 2;
     
   }
 
@@ -360,6 +389,7 @@ export default {
   to {
     opacity: 0.5; /* ajusta la opacidad según tus preferencias */
     color: var(--yellow);
+    
   }
 }
 
