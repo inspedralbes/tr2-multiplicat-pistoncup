@@ -4,8 +4,10 @@
 
     <div id="graellaPosicions" v-if="pilots.length > 0">
       <div id="cont">
-       <div id="logo"><img src="/img/logo_text.png" alt=""></div>
-        <div id="contQuestions"><h3> {{ `${currentQuestionIndex + 1}/${preguntas.length}` }}</h3></div>
+        <div id="logo"><img src="/img/logo_text.png" alt=""></div>
+        <div id="contQuestions">
+          <h3> {{ `${currentQuestionIndex + 1}/${preguntas.length}` }}</h3>
+        </div>
       </div>
       <div id="barraPosiciones" v-if="connectedUsers.length">
         <div class="carrusel-container">
@@ -74,9 +76,9 @@
           <h1>¡Fin del cuestionario!</h1>
         </div>
 
-        </div>
-
       </div>
+
+    </div>
 
   </body>
 </template>
@@ -114,7 +116,7 @@ export default {
     connectedUsers() {
       const appStore = useAppStore();
       return appStore.connectedUsers;
-      
+
     },
   },
 
@@ -143,10 +145,10 @@ export default {
         console.error('Error fetching pilots:', error);
       }
     },
-    
+
 
     //--------------------------------------------------------------------- temporizador de la pregunta
-    
+
     startQuestionTimer() {
       this.timeRemaining = 15; // reiniciar el tiempo para cada pregunta
       if (this.questionTimer) {
@@ -168,18 +170,18 @@ export default {
     },
 
     getTimerClass() {
-    return {
-      'timer-red': this.timeRemaining <= 5,
-    };
-  },
+      return {
+        'timer-red': this.timeRemaining <= 5,
+      };
+    },
 
 
     //--------------------------------------------------------------------- pasa a la siguiente pregunta
-     nextQuestion() {
+    nextQuestion() {
       if (this.currentQuestionIndex < this.preguntas.length - 1) {
         this.currentQuestionIndex++;
         this.selectedButton = false; // Desmarcar el botón
-        this.show=false;
+        this.show = false;
         this.startQuestionTimer(); // Iniciar el temporizador para la nueva pregunta
       } else {
         // Si es la última pregunta, no incrementar más y mostrar el v-else
@@ -187,10 +189,10 @@ export default {
         clearInterval(this.questionTimer); // Detener el temporizador si es la última pregunta
       }
     },
-      
 
 
-    
+
+
     readAnswer(respuestaIndex) {
       const preguntaIndex = this.currentQuestionIndex;
       const pregunta = this.preguntas[preguntaIndex].enunciat;
@@ -224,27 +226,24 @@ export default {
     goToPodiumPage() {
       this.$router.push('/podiumPage');
     },
-    
+
     startCarousel() {
-    setInterval(() => {
-      // Obtén el usuario actual del carrusel
-      const currentUser = this.connectedUsers[this.currentPilotIndex];
+      setInterval(() => {
+        // Obtén el usuario actual del carrusel
+        const currentUser = this.connectedUsers[this.currentPilotIndex];
+        currentUser.coche = `/img/coches/${this.currentPilotIndex+1}.png`; // Ajusta el nombre del coche según tu estructura de archivos
+          console.log(this.currentPilotIndex+1);
 
-      // Asigna la propiedad 'coche' a cada usuario (ajusta la lógica según tus necesidades)
-      currentUser.coche = currentUser.id % 2 === 0 ? '1.png' : '2.png';
+        // Load image for the current user's car
+        const carImage = new Image();
+        carImage.src = `/img/coches/${this.currentPilotIndex+1}.png`;
 
-      // Load image for the current user's car
-      const carImage = new Image();
-      carImage.src = `/img/coches/${currentUser.coche}`;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.drawImage(carImage, this.x, this.y);
 
-      // Limpiar el canvas y dibujar la nueva imagen del coche
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.drawImage(carImage, this.x, this.y);
-
-      // Incrementa el índice para el próximo usuario
-      this.currentPilotIndex = (this.currentPilotIndex + 1) % this.connectedUsers.length;
-    }, 5000);
-  },
+        this.currentPilotIndex = (this.currentPilotIndex + 1) % this.connectedUsers.length;
+      }, 5000);
+    },
     drawImage() {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.ctx.drawImage(this.img, this.x, this.y);
@@ -254,16 +253,16 @@ export default {
       this.drawImage();
     },
     generateRandomColor() {
-  if (!this.randomColor) {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    this.randomColor = color; // Almacena el color generado para su uso posterior
-  }
-  return this.randomColor;
-},
+      if (!this.randomColor) {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        this.randomColor = color; // Almacena el color generado para su uso posterior
+      }
+      return this.randomColor;
+    },
 
 
   },
@@ -281,7 +280,8 @@ export default {
 
     // Initial draw
     this.startQuestionTimer(); // Iniciar el temporizador al cargar la página
-    
+    this.img.src = `/img/coches/${this.currentPilotIndex+1}.png`; // Ajusta la ruta según tu estructura de archivos
+    this.startCarousel();
 
   },
 };
@@ -349,14 +349,14 @@ export default {
     border-radius: 20px;
     border: 4px solid var(--darkRed);
     z-index: 2;
-    
+
   }
 
-  .respostes{
+  .respostes {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-gap: 20px;
-    
+
   }
 
   .resposta {
@@ -378,31 +378,34 @@ export default {
   }
 
   .timer-red {
-  color: var(--darkRed); 
-  animation: blink .3s infinite alternate; /* ajusta la duración según tus preferencias */
-}
+    color: var(--darkRed);
+    animation: blink .3s infinite alternate;
+    /* ajusta la duración según tus preferencias */
+  }
 
-@keyframes blink {
-  from {
-    opacity: 1;
+  @keyframes blink {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0.5;
+      /* ajusta la opacidad según tus preferencias */
+      color: var(--yellow);
+
+    }
   }
-  to {
-    opacity: 0.5; /* ajusta la opacidad según tus preferencias */
-    color: var(--yellow);
-    
-  }
-}
 
   canvas {
     background-image: url(../views/img/canva.gif);
     background-size: contain;
     width: 100%;
     height: 100%;
-    
-    
+
+
   }
 
-  
+
 
   #showDescr {
     background-color: var(--yellow);
@@ -432,19 +435,19 @@ export default {
     padding: 5px;
   }
 
-  #contQuestions{
+  #contQuestions {
     text-align: right;
     padding-right: 15px;
     padding-top: 2px;
     font-size: 1.5em;
   }
 
-  #contQuestions h3{
+  #contQuestions h3 {
     margin: 0;
     padding-top: 5px;
   }
 
-  #logo img{
+  #logo img {
     width: 55px;
     padding: 5px;
   }
