@@ -49,6 +49,8 @@
           <button @click="moveImage">Move Image Up</button>
           <h1>{{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h1>
 
+          <img src="/img/coches/1.png" alt="">
+
           <h1>{{ preguntas[currentQuestionIndex].enunciat }}</h1>
           <img :src="preguntas[currentQuestionIndex].imatge" alt="">
           <div class="respostes" v-if="timeRemaining < 11">
@@ -105,6 +107,8 @@ export default {
       img: new Image(),
       x: 100,
       y: 450, // Initial position based on canvas and image height
+      cars: [], // Agrega un array para almacenar las imágenes de los coches
+
     };
   },
 
@@ -229,28 +233,33 @@ export default {
 
     startCarousel() {
       setInterval(() => {
-        // Obtén el usuario actual del carrusel
-        const currentUser = this.connectedUsers[this.currentPilotIndex];
-        currentUser.coche = `/img/coches/${this.currentPilotIndex+1}.png`; // Ajusta el nombre del coche según tu estructura de archivos
-          console.log(this.currentPilotIndex+1);
-
-        // Load image for the current user's car
-        const carImage = new Image();
-        carImage.src = `/img/coches/${this.currentPilotIndex+1}.png`;
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.drawImage(carImage, this.x, this.y);
-
-        this.currentPilotIndex = (this.currentPilotIndex + 1) % this.connectedUsers.length;
+        this.currentPilotIndex = (this.currentPilotIndex + 1) % this.pilots.length;
+        this.drawImage();
       }, 5000);
     },
     drawImage() {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.drawImage(this.img, this.x, this.y);
+
+      // Loop through all connected users and draw their cars
+      this.connectedUsers.forEach((user, index) => {
+        const carPositionX = user.carPositionX;
+        const userCar = this.cars[index];
+
+        // Draw the image of the car at the specified position
+        this.ctx.drawImage(userCar, carPositionX, this.y);
+      });
     },
     moveImage() {
-      this.y -= 10; // Adjust the value based on how much you want it to move
-      this.drawImage();
+      // Ensure there is a next user before updating the position
+      if (this.connectedUsers[this.currentPilotIndex + 1]) {
+        // Update the position of the next user's car
+        this.connectedUsers[this.currentPilotIndex + 1].carPositionY -= 10;
+
+        // Redraw the image
+        this.drawImage();
+      } else {
+        console.warn("No next user available");
+      }
     },
     generateRandomColor() {
       if (!this.randomColor) {
@@ -264,6 +273,21 @@ export default {
       return this.randomColor;
     },
 
+    loadCars() {
+      const separation = 50; // Ajusta este valor según sea necesario
+      for (let i = 1; i <= this.connectedUsers.length; i++) {
+        const carImage = new Image();
+        carImage.src = `/img/coches/${i}.png`;
+
+        // Establece la posición inicial en el eje X para cada usuario con separación
+        this.connectedUsers[i - 1].carPositionX = this.x + i * separation;
+
+        this.cars.push(carImage);
+      }
+    },
+
+
+
 
   },
 
@@ -271,18 +295,17 @@ export default {
   mounted() {
     this.startCarousel();
     this.fetchPreguntas();
-    this.fetchPilots();
-    // Get canvas and context
-    this.canvas = this.$refs.myCanvas;
-    this.ctx = this.canvas.getContext("2d");
+    this.fetchPilots().then(() => {
+      // Load images of cars after fetching pilots
+      this.loadCars();
 
-    // Load image
+      // Get canvas and context
+      this.canvas = this.$refs.myCanvas;
+      this.ctx = this.canvas.getContext("2d");
 
-    // Initial draw
-    this.startQuestionTimer(); // Iniciar el temporizador al cargar la página
-    this.img.src = `/img/coches/${this.currentPilotIndex+1}.png`; // Ajusta la ruta según tu estructura de archivos
-    this.startCarousel();
-
+      // Initial draw
+      this.startQuestionTimer(); // Iniciar el temporizador al cargar la página
+    });
   },
 };
 </script>

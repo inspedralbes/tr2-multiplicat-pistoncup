@@ -98,11 +98,7 @@ export default {
       }
     },
   },
-  mounted() {
 
-
-    this.onMounted();
-  },
 }
 </script>
   
