@@ -5,10 +5,10 @@
         <div>
           <h1>INICIAR SESIÓN</h1>
           <form @submit.prevent="iniciarSesion">
-            <label for="email">Correo electrónico:</label>
+            <label for="email">CORREU ELECTRONIC:</label>
             <input v-model="email" type="email" id="email" name="email" required>
             <br>
-            <label for="password">Contraseña:</label>
+            <label for="password">CONTRASENYA:</label>
             <input v-model="password" type="password" id="password" name="password" required>
             <br>
             <button type="submit" class="play-button">Iniciar Sesión</button>
@@ -23,7 +23,8 @@
 </template>
   
 <script>
-import { socket } from '../socket.js'
+import { socket } from '../socket.js';
+
 export default {
   name: 'loginPage',
   data() {
@@ -33,56 +34,54 @@ export default {
     };
   },
   methods: {
-    iniciarSesion() {
+    async iniciarSesion() {
       if (this.email && this.password) {
         const credentials = {
           email: this.email,
           password: this.password,
         };
 
-        fetch('http://localhost:8000/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(credentials),
-        })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Error al iniciar sesión.');
-            }
-            return response.json();
-          })
-          .then(jsonData => {
-            const data = jsonData.data;
-            if (data.error === 1) {
-              console.error('Error al iniciar sesión:', data.missatge);
-            } else {
-              localStorage.setItem('token', data.token);
-              console.log('Inicio de sesión exitoso');
-              this.$router.push('/waitingRoom');
-              socket.emit('Nuevo usuario', this.email);
-              socket.emit('add_user');
-            }
-          })
-          .catch(error => {
-            console.error('Error al iniciar sesión:', error);
+        try {
+          const response = await fetch('http://localhost:8000/api/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(credentials),
           });
+
+          if (!response.ok) {
+            throw new Error('Error al iniciar sesión.');
+          }
+
+          const jsonData = await response.json();
+          const data = jsonData.data || {};
+
+          if (data.error === 1) {
+            console.error('Error al iniciar sesión:', data.message);
+          } else {
+            console.log('Inicio de sesión exitoso');
+
+            // Asignar el rol "profesor" al usuario
+            const user = {
+              ...data.user, // Copiar las demás propiedades del usuario
+              role: 'profesor',
+            };
+
+            localStorage.setItem('user', JSON.stringify(user));
+            socket.emit('Nuevo usuario', "=============PROFESOR============="); // Envía el piloto seleccionado
+            socket.emit("add_user");
+            this.$router.push('/waitingRoom');
+          }
+        } catch (error) {
+          console.error('Error al iniciar sesión:', error);
+        }
       } else {
         console.error('Por favor, ingresa un correo electrónico y una contraseña.');
       }
     },
-    irRegistro() {
-      this.$router.push('/pantallaPrueba');
-    },
-    irLanding() {
-      this.$router.push('/');
-    },
   },
-  mounted() {
-    this.onMounted();
-  },
-}
+};
 </script>
   
 <style scoped>
@@ -126,7 +125,7 @@ body {
   margin-top: 13.5vh;
 }
 
-h1{
+h1 {
   text-align: center;
   font-size: 2.1em;
   font-weight: bold;
