@@ -69,7 +69,7 @@ export default {
             };
 
             localStorage.setItem('user', JSON.stringify(user));
-            socket.emit('Nuevo usuario', "=============PROFESOR============="); // Envía el piloto seleccionado
+            socket.emit('Nuevo usuario', "===PROFESOR==="); // Envía el piloto seleccionado
             socket.emit("add_user");
             this.$router.push('/waitingRoom');
           }
@@ -81,7 +81,7 @@ export default {
       }
     },
   },
-
+};
 </script>
   
 <style scoped>
