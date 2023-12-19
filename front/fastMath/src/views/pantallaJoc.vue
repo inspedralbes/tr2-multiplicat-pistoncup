@@ -143,7 +143,10 @@ export default {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        this.preguntas = data;
+        this.preguntas = data.map((pregunta) => ({
+          ...pregunta,
+          respuestaCorrecta: pregunta.respuesta_correcta,
+        }));
       } catch (error) {
         console.error('Error fetching preguntas:', error);
       }
@@ -210,28 +213,47 @@ export default {
     //--------------------------------------------------------------------- leer respuesta 
 
     readAnswer(respuestaIndex) {
-      const preguntaIndex = this.currentQuestionIndex;
-      const pregunta = this.preguntas[preguntaIndex].enunciat;
 
-      // Comprobar si ya se ha registrado una respuesta para la pregunta actual
-      const existingResponseIndex = this.respuestas.findIndex(
-        (resp) => resp.pregunta === pregunta
-      );
 
-      if (existingResponseIndex === -1) {
-        // Si no se ha registrado una respuesta, registrarla
-        const respuesta = this.preguntas[preguntaIndex]['resposta' + respuestaIndex];
-        this.respuestas.push({ pregunta, respuesta, respuestaIndex });
-        this.selectedButton = respuestaIndex; // Marcar el botón como seleccionado
-        console.log(this.respuestas);
+  const preguntaIndex = this.currentQuestionIndex;
+
+  // Verificar si ya se ha seleccionado una respuesta
+  if (!this.selectedButton) {
+    // Obtener la información de la pregunta y respuesta
+    const pregunta = this.preguntas[preguntaIndex].enunciat;
+    const respuestaSeleccionada = this.preguntas[preguntaIndex]['resposta' + respuestaIndex]?.toLowerCase();
+    const respuestaCorrecta = this.preguntas[preguntaIndex].correcta?.toLowerCase();
+
+    if (respuestaCorrecta !== undefined && respuestaSeleccionada !== undefined) {
+      const esRespuestaCorrecta = respuestaSeleccionada === respuestaCorrecta;
+
+      if (esRespuestaCorrecta) {
+        console.log('Respuesta Correcta');
+        // Realizar acciones adicionales para una respuesta correcta
       } else {
-        // Si ya se ha registrado una respuesta, mostrar un mensaje de error
-        console.log('Ya has seleccionado la respuesta');
-       
+        console.log('Respuesta Incorrecta');
+        // Realizar acciones adicionales para una respuesta incorrecta
       }
-    },
 
-    //--------------------------------------------------------------------- mostrar y ocultar explicación
+      // Marcar el botón seleccionado
+      this.selectedButton = respuestaIndex;
+
+      // Deshabilitar los botones de respuesta
+      this.disableAnswerButtons();
+
+    } else {
+      console.error('Error: respuestaCorrecta o respuestaSeleccionada es undefined.');
+    }
+  }
+},
+
+disableAnswerButtons() {
+  // Deshabilitar los botones de respuesta
+  for (let i = 1; i <= 4; i++) {
+    document.querySelector(`.resposta:nth-child(${i})`).disabled = true;
+  }
+},
+
 
     showDescr() {
       this.show = true;
