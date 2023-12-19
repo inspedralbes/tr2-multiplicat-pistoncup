@@ -54,9 +54,8 @@ export default {
             // Cambia el valor de mostrarImagen a true cuando se recibe el evento 'partida_iniciada'
             this.mostrarImagen = true;
 
-            if (this.isUserAuthenticated) {
+            
                 this.$router.push('/pantallaJoc');
-            }
         });
     },
 };
