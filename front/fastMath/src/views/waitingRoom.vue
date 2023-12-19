@@ -3,17 +3,18 @@
         <div class="todo">
             <div class="container">
                 <h1>Lista de usuarios conectados:</h1>
-                <img v-if="start" src="/img/semaforo.gif" alt="" width="400">
+                <!-- Usa la propiedad mostrarImagen para determinar qué imagen mostrar -->
+                <img :src="mostrarImagen ? 'img/semaforo.gif' : 'otraImagen.png'" alt="" width="400">
+                
                 <ul>
                     <li v-for="user in users" :key="user.id">{{ user.username }}</li>
                 </ul>
-                <button v-if="isUserAuthenticated" @click="unirmePartida" class="play-button">Començar
-                    partida</button>
+                <button v-if="isUserAuthenticated && !mostrarImagen" @click="unirmePartida" class="play-button">Començar partida</button>
             </div>
         </div>
     </body>
 </template>
-  
+
 <script>
 import { useAppStore } from '../stores/app.js';
 import { socket } from '../socket.js';
@@ -22,8 +23,7 @@ export default {
     name: 'waitingRoom',
     data() {
         return {
-            contador: 5,
-            start:false,
+            mostrarImagen: false, // Nueva propiedad para determinar qué imagen mostrar
         };
     },
     computed: {
@@ -32,7 +32,6 @@ export default {
             return appStore.connectedUsers;
         },
         isUserAuthenticated() {
-            // Verificar si el usuario está autenticado y tiene el rol de profesor según localStorage
             const user = JSON.parse(localStorage.getItem('user'));
             return user !== null && user.role === 'profesor';
         },
@@ -41,26 +40,28 @@ export default {
         unirmePartida() {
             console.log('Enviando solicitud de inicio');
             socket.emit('solicitud_inicio');
-            this.start=true;
         },
     },
     mounted() {
-        socket.on('cuenta_atras', (contador) => {
+        socket.on('cuenta_atras', () => {
             console.log('Recibido evento de contador');
-            this.contador = contador;
+            // Cambia el valor de mostrarImagen a true cuando se recibe el evento 'cuenta_atras'
+            this.mostrarImagen = true;
         });
 
-        socket.on('inicio_partida', () => {
+        socket.on('partida_iniciada', () => {
             console.log('Recibido evento de inicio de partida');
-            // Redirigir solo si el usuario está autenticado y tiene el rol de profesor
+            // Cambia el valor de mostrarImagen a true cuando se recibe el evento 'partida_iniciada'
+            this.mostrarImagen = true;
 
-            this.$router.push('/pantallaJoc');
-
+            if (this.isUserAuthenticated) {
+                this.$router.push('/pantallaJoc');
+            }
         });
     },
 };
 </script>
-  
+
 <style scoped>
 body {
     display: flex;
@@ -80,7 +81,6 @@ body {
     background-size: cover;
 }
 
-/* Estilos para el componente WaitingRoom */
 .container {
     padding: 20px;
     margin: 50px auto;
@@ -108,8 +108,6 @@ ul li {
     font-weight: bold;
 }
 
-
-
 .play-button {
     background-color: red;
     color: white;
@@ -124,7 +122,5 @@ ul li {
     cursor: pointer;
     border-radius: 8px;
     width: 100%;
-    /* Ancho del botón al 100% */
 }
 </style>
-  
