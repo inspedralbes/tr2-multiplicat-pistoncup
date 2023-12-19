@@ -51,9 +51,9 @@ export default {
         socket.on('inicio_partida', () => {
             console.log('Recibido evento de inicio de partida');
             // Redirigir solo si el usuario está autenticado y tiene el rol de profesor
-            if (this.isUserAuthenticated) {
-                this.$router.push('/pantallaJoc');
-            }
+
+            this.$router.push('/pantallaJoc');
+
         });
     },
 };
