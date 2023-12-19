@@ -3,7 +3,7 @@
         <div class="todo">
             <div class="container">
                 <h1>Lista de usuarios conectados:</h1>
-                <h1>{{ contador }}</h1>
+                <img v-if="start" src="/img/semaforo.gif" alt="" width="400">
                 <ul>
                     <li v-for="user in users" :key="user.id">{{ user.username }}</li>
                 </ul>
@@ -23,6 +23,7 @@ export default {
     data() {
         return {
             contador: 5,
+            start:false,
         };
     },
     computed: {
@@ -40,6 +41,7 @@ export default {
         unirmePartida() {
             console.log('Enviando solicitud de inicio');
             socket.emit('solicitud_inicio');
+            this.start=true;
         },
     },
     mounted() {
