@@ -49,4 +49,5 @@ VALUES ('Juan Manuel Fangio'),
        ('Yuki Tsunoda'),
        ('Robert Kubica'),
        ('Francesco Virgolini'),
+       ('Rayo McQueen'),
        ('Nico Hülkenberg');
