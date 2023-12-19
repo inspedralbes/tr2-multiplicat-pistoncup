@@ -13,7 +13,7 @@
         <div class="carrusel-container">
           <div class="carrusel" ref="carrusel">
             <div class="posicion" v-for="(user, i) in connectedUsers" :key="i">
-              <div class="color-franja" :style="{ backgroundColor: generateRandomColor() }"></div>
+              <div class="color-franja" :style="{ backgroundColor: colors[i] }"></div>
               <div class="numero">{{ i + 1 }}</div>
               <div class="nombre">{{ user.username }}</div> 
               
@@ -107,6 +107,18 @@ export default {
       x: 100,
       y: 450, 
       cars: [], 
+      colors:[ 
+        '#002a38',
+        '#006334',
+        '#0091ba',
+        '#898989',
+        '#c70000',
+        '#000000',
+        '#780000', 
+        '#ff0000',
+        '#ff7f00',
+        '#ffff00',
+      ],
 
     };
   },
@@ -246,34 +258,46 @@ export default {
     //--------------------------------------------------------------------- carga los coches
 
     loadCars() {
-      // Separación entre coches
-      const separation = 50; 
-      for (let i = 1; i <= this.connectedUsers.length; i++) {
-        const carImage = new Image();
-        carImage.src = `/img/coches/${i}.png`;
+  // Separación entre coches
+  const separation = 50; 
+  const ancho = 40; // Ajusta el ancho deseado según tus preferencias
 
-        // Establece la posición inicial en el eje X para cada usuario con separación
-        this.connectedUsers[i - 1].carPositionX = this.x + i * separation;
+  for (let i = 1; i <= this.connectedUsers.length; i++) {
+    const carImage = new Image();
+    carImage.src = `/img/coches/${i}.png`;
 
-        this.cars.push(carImage);
-      }
-    },
+    // Calcula la altura proporcional para mantener la relación de aspecto
+    carImage.onload = () => {
+      const aspectRatio = carImage.width / carImage.height;
+      const alto = ancho / aspectRatio;
+
+      // Establece el tamaño deseado de la imagen del coche
+      carImage.width = ancho;
+      carImage.height = alto;
+
+      // Establece la posición inicial en el eje X para cada usuario con separación
+      this.connectedUsers[i - 1].carPositionX = this.x + i * separation;
+
+      this.cars.push(carImage);
+      this.drawImage(); // Asegúrate de dibujar después de cargar todas las imágenes
+    };
+  }
+},
 
     //--------------------------------------------------------------------- imprime el coche en el canva
 
     drawImage() {
-      // Borra el canvas antes de imprimir el coche
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  // Borra el canvas antes de imprimir el coche
+  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      
-      this.connectedUsers.forEach((user, index) => {
-        const carPositionX = user.carPositionX;
-        const userCar = this.cars[index];
+  this.connectedUsers.forEach((user, index) => {
+    const carPositionX = user.carPositionX;
+    const userCar = this.cars[index];
 
-        // Imprime el coche
-        this.ctx.drawImage(userCar, carPositionX, this.y);
-      });
-    },
+    // Imprime el coche ajustando la posición y tamaño
+    this.ctx.drawImage(userCar, carPositionX, this.y, userCar.width, userCar.height);
+  });
+},
     moveImage() {
 
     },
