@@ -1,5 +1,5 @@
 import './assets/style.css'
-
+import { io } from 'socket.io-client';
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
@@ -27,6 +27,10 @@ fetch('datos.json')
         // Manejar errores
         console.error('Error al leer los datos:', error)
     })
+
+const socket = io('http://localhost:3000'); // Ajusta la URL del servidor según tu configuración
+
+export { socket };
 
 app.mount('#app')
 

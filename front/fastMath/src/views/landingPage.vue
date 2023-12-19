@@ -1,9 +1,17 @@
 <template>
   <body>
     <div class="todo">
+      <header>
+        <div class="login-link">
+          <img @click="toLogin" src="../views/img/logologin.jpg" alt="Login">
+          <span class="tooltip">Login</span>
+        </div>
+      </header>
       <div class="formulari">
+        <img src="../views/img/logo_fastmath_black.png  " alt="logoFastMath">
+      
         <div>
-          <label for="pilots">Selecciona un piloto de Fórmula Uno:</label>
+          <label for="pilots">SELECCIONA UN PILOT:</label>
           <select v-model="selectedPilot" id="pilots" name="pilots" size="1">
             <option v-for="pilot in fetchedData" :key="pilot.id" :value="pilot.pilot_name">
               {{ pilot.pilot_name }}
@@ -12,7 +20,7 @@
           <br>
           <button id="add_user" @click="unirmePartida" class="play-button">Jugar</button>
           <br>
-          <button class="test-button" type="button">Prueba</button>
+          <button @click="unirmePrueba" class="test-button" type="button">Prueba</button>
         </div>
       </div>
     </div>
@@ -21,6 +29,7 @@
 
 <script>
 import { socket } from '../socket.js'
+import { useAppStore } from '../stores/app.js';
 export default {
   name: 'landingPage',
   data() {
@@ -32,9 +41,24 @@ export default {
   methods: {
     unirmePartida() {
       if (this.selectedPilot) {
-        this.$router.push('/pantallaJoc');
+        
         socket.emit('Nuevo usuario', this.selectedPilot); // Envía el piloto seleccionado
         socket.emit("add_user");
+        //guardo los datos en pinia
+        const appStore = useAppStore();
+        appStore.setLoginInfo(true,this.selectedPilot);
+
+        this.$router.push('/waitingRoom');
+      } else {
+        console.error('Por favor, selecciona un piloto antes de jugar.');
+      }
+    },
+    toLogin() {
+      this.$router.push('/loginPage');
+    },
+    unirmePrueba(){
+      if (this.selectedPilot) {
+        this.$router.push('/pantallaPrueba');
       } else {
         console.error('Por favor, selecciona un piloto antes de jugar.');
       }
@@ -57,6 +81,8 @@ export default {
     },
   },
   mounted() {
+ 
+
     this.onMounted();
   },
 }
@@ -74,36 +100,80 @@ body {
   /* Elimina el margen predeterminado del body */
 }
 
+header {
+  padding: 30px;
+  position: relative; /* Agrega posición relativa para que funcione el posicionamiento absoluto */
+}
+
+header img {
+  position: absolute;
+  top: 5px; 
+  right: 10px; 
+  width: 70px; 
+  height: 70px; 
+  border-radius: 10px;
+}
+
+.tooltip {
+  position: absolute;
+  top: 100%;
+  right: 20px;
+  transform: translateX(-50%);
+  font-size: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease; /* Agrega una transición para suavizar el efecto */
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 7px;
+  border-radius: 5px;
+  pointer-events: none; /* Evita que el tooltip afecte a los eventos del enlace */
+}
+
+.login-link:hover .tooltip {
+  opacity: 1;
+}
+
 .todo {
   width: 100%;
   height: 100%;
-  background-image: url("https://media.istockphoto.com/id/1214704318/es/vector/habitaci%C3%B3n-en-blanco-y-negro.jpg?s=612x612&w=0&k=20&c=-s2L7kc5FGJliczGY-RPVqwfK5j85ZIsQqYRqh1vuTA=");
+  background-image: url("../views/img/landingGif.gif");
   background-repeat: no-repeat;
   background-size: cover;
 }
-
+.formulari img {
+  margin-top: -40px;
+  width: 100%;
+  height: 100%;
+  margin-bottom: -30px;
+}
 .formulari {
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(97, 97, 97, 0.89);
   /* Fondo blanco algo opaco */
   border-radius: 15px;
   /* Bordes redondos */
-  border: 2px solid #555;
+  border: 2px solid #f70707;
   /* Borde gris oscuro */
-  width: 300px;
+  width: 370px;
   /* Ancho del formulario */
   margin: auto;
-  margin-top: 25vh;
+  margin-top: 7vh;
 }
+
+
 
 label {
   display: block;
   margin-bottom: 10px;
+  color: white;
+  font-size: 2.1em;
+  font-weight: bold;
+  font-variant: small-caps;
 }
 
 select {
   width: 100%;
-  padding: 8px;
+  padding: 15px;
   margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -118,27 +188,31 @@ select {
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 16px;
+  font-size: 20px;
+  font-weight: bold;
   margin: 4px 2px;
   cursor: pointer;
   border-radius: 8px;
   width: 100%;
+  border: 2px solid rgb(145, 3, 3);
   /* Ancho del botón al 100% */
 }
 
 .test-button {
-  background-color: rgb(100, 94, 94);
+  background-color: rgb(151, 150, 150);
   color: white;
   border: none;
   padding: 15px 20px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 16px;
+  font-size: 20px;
+  font-weight: bold;
   margin: 4px 2px;
   cursor: pointer;
   border-radius: 8px;
   width: 100%;
+  border: 2px solid rgb(48, 48, 48);
   /* Ancho del botón al 100% */
 }
 </style>

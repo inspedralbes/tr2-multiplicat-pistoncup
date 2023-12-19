@@ -1,26 +1,63 @@
 import { ref, computed } from 'vue'
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
+
 export const useAppStore = defineStore('app', {
   state: () => ({
     loginInfo: {
       loggedIn: false,
       username: '',
-      image: '',
-    }
-  
+      points: 0,
+      position: 0,
+    },
+    connectedUsers: [],
+    loggedInUsers: [],
   }),
   actions: {
-    setLoginInfo({ loggedIn, username, image }) {
+    setLoginInfo( loggedIn, username ) {      
       this.loginInfo.loggedIn = loggedIn;
       this.loginInfo.username = username;
-      this.loginInfo.image = image;
+      this.loginInfo.points = 0;
+      this.loginInfo.position = 0;
     },
-    isLoggedIn(){
+    isLoggedIn() {
       return this.loginInfo.loggedIn;
     },
-    getLoginInfo(){
+    getLoginInfo() {
       return this.loginInfo;
-    }
-  },
-})
+    },
+    getConnectedUsers() {
+      return this.connectedUsers;
+    },
+    setUsers(users) {
+      this.connectedUsers = users;
+    },
 
+    addUser(user) {
+      this.connectedUsers.push(user);
+    },
+
+    removeUser(userId) {
+      const index = this.connectedUsers.findIndex((user) => user.id === userId);
+      if (index !== -1) {
+        this.connectedUsers.splice(index, 1);
+      }
+    },
+    updateConnectedUsers(users) {
+      this.setUsers(users);
+    },
+    addLoggedInUser(user) {
+      this.loggedInUsers.push(user);
+    },
+
+    removeLoggedInUser(userId) {
+      const index = this.loggedInUsers.findIndex((user) => user.id === userId);
+      if (index !== -1) {
+        this.loggedInUsers.splice(index, 1);
+      }
+    },
+
+    updateLoggedInUsers(users) {
+      this.loggedInUsers = users;
+    },
+  },
+});
