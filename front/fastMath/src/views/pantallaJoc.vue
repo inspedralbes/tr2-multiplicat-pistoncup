@@ -13,10 +13,10 @@
         <div class="carrusel-container">
           <div class="carrusel" ref="carrusel">
             <div class="posicion" v-for="(user, i) in connectedUsers" :key="i">
-              <div class="color-franja" :style="{ backgroundColor: generateRandomColor() }"></div>
+              <div class="color-franja" :style="{ backgroundColor: colors[i] }"></div>
               <div class="numero">{{ i + 1 }}</div>
-              <div class="nombre">{{ user.username }}</div> <!-- or user.pilot_name, based on your data structure -->
-              <!-- Add more properties if needed -->
+              <div class="nombre">{{ user.username }}</div> 
+              
             </div>
           </div>
         </div>
@@ -46,7 +46,6 @@
           <h2 :class="getTimerClass()">{{ `${formatTime(timeRemaining)}` }}</h2>
 
 
-          <button @click="moveImage">Move Image Up</button>
           <h1>{{ `Pregunta ${currentQuestionIndex + 1}/${preguntas.length}` }}</h1>
 
           <img src="/img/coches/1.png" alt="">
@@ -87,7 +86,7 @@
 
 <script>
 import navBar from '../components/nav.vue';
-import { useAppStore } from '../stores/app.js'; // Import your store
+import { useAppStore } from '../stores/app.js'; 
 
 
 export default {
@@ -99,15 +98,27 @@ export default {
       currentQuestionIndex: 0,
       autoNextTimer: null,
       timeRemaining: 15,
-      respuestas: [], // Agregamos el array para almacenar las respuestas
+      respuestas: [], 
       selectedButton: false,
       show: false,
       canvas: null,
       ctx: null,
       img: new Image(),
       x: 100,
-      y: 450, // Initial position based on canvas and image height
-      cars: [], // Agrega un array para almacenar las imágenes de los coches
+      y: 450, 
+      cars: [], 
+      colors:[ 
+        '#002a38',
+        '#006334',
+        '#0091ba',
+        '#898989',
+        '#c70000',
+        '#000000',
+        '#780000', 
+        '#ff0000',
+        '#ff7f00',
+        '#ffff00',
+      ],
 
     };
   },
@@ -199,8 +210,11 @@ export default {
 
 
 
+    //--------------------------------------------------------------------- leer respuesta 
 
     readAnswer(respuestaIndex) {
+
+
   const preguntaIndex = this.currentQuestionIndex;
 
   // Verificar si ya se ha seleccionado una respuesta
@@ -249,10 +263,13 @@ disableAnswerButtons() {
     hiddenDescr() {
       this.show = false;
     },
+    //--------------------------------------------------------------------- ir al podio
 
     goToPodiumPage() {
       this.$router.push('/podiumPage');
     },
+
+    //--------------------------------------------------------------------- carrusel
 
     startCarousel() {
       setInterval(() => {
@@ -260,30 +277,54 @@ disableAnswerButtons() {
         this.drawImage();
       }, 5000);
     },
+    //--------------------------------------------------------------------- carga los coches
+
+    loadCars() {
+  // Separación entre coches
+  const separation = 50; 
+  const ancho = 40; // Ajusta el ancho deseado según tus preferencias
+
+  for (let i = 1; i <= this.connectedUsers.length; i++) {
+    const carImage = new Image();
+    carImage.src = `/img/coches/${i}.png`;
+
+    // Calcula la altura proporcional para mantener la relación de aspecto
+    carImage.onload = () => {
+      const aspectRatio = carImage.width / carImage.height;
+      const alto = ancho / aspectRatio;
+
+      // Establece el tamaño deseado de la imagen del coche
+      carImage.width = ancho;
+      carImage.height = alto;
+
+      // Establece la posición inicial en el eje X para cada usuario con separación
+      this.connectedUsers[i - 1].carPositionX = this.x + i * separation;
+
+      this.cars.push(carImage);
+      this.drawImage(); // Asegúrate de dibujar después de cargar todas las imágenes
+    };
+  }
+},
+
+    //--------------------------------------------------------------------- imprime el coche en el canva
+
     drawImage() {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  // Borra el canvas antes de imprimir el coche
+  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      // Loop through all connected users and draw their cars
-      this.connectedUsers.forEach((user, index) => {
-        const carPositionX = user.carPositionX;
-        const userCar = this.cars[index];
+  this.connectedUsers.forEach((user, index) => {
+    const carPositionX = user.carPositionX;
+    const userCar = this.cars[index];
 
-        // Draw the image of the car at the specified position
-        this.ctx.drawImage(userCar, carPositionX, this.y);
-      });
-    },
+    // Imprime el coche ajustando la posición y tamaño
+    this.ctx.drawImage(userCar, carPositionX, this.y, userCar.width, userCar.height);
+  });
+},
     moveImage() {
-      // Ensure there is a next user before updating the position
-      if (this.connectedUsers[this.currentPilotIndex + 1]) {
-        // Update the position of the next user's car
-        this.connectedUsers[this.currentPilotIndex + 1].carPositionY -= 10;
 
-        // Redraw the image
-        this.drawImage();
-      } else {
-        console.warn("No next user available");
-      }
     },
+
+
     generateRandomColor() {
       if (!this.randomColor) {
         const letters = '0123456789ABCDEF';
@@ -296,20 +337,6 @@ disableAnswerButtons() {
       return this.randomColor;
     },
 
-    loadCars() {
-      const separation = 50; // Ajusta este valor según sea necesario
-      for (let i = 1; i <= this.connectedUsers.length; i++) {
-        const carImage = new Image();
-        carImage.src = `/img/coches/${i}.png`;
-
-        // Establece la posición inicial en el eje X para cada usuario con separación
-        this.connectedUsers[i - 1].carPositionX = this.x + i * separation;
-
-        this.cars.push(carImage);
-      }
-    },
-
-
 
 
   },
@@ -319,15 +346,15 @@ disableAnswerButtons() {
     this.startCarousel();
     this.fetchPreguntas();
     this.fetchPilots().then(() => {
-      // Load images of cars after fetching pilots
+      // Carga las imágenes de los coches despues de cargar los pilotos
       this.loadCars();
 
-      // Get canvas and context
+      // Obtener el contexto del canvas
       this.canvas = this.$refs.myCanvas;
       this.ctx = this.canvas.getContext("2d");
 
-      // Initial draw
-      this.startQuestionTimer(); // Iniciar el temporizador al cargar la página
+      // Iniciar el temporizador al cargar la página
+      this.startQuestionTimer(); 
     });
   },
 };

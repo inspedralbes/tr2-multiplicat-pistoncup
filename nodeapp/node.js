@@ -32,7 +32,8 @@ io.on('connection', (socket) => {
         //emit a TODO EL MUNDO con el eventeo inicia_partida
         socket.on('solicitud_inicio', () => {
             console.log("Solicitud de inicio de partida");
-            let contador = 5;
+            let contador = 6;
+            let start = true;
         
             const intervalo = setInterval(() => {
                 io.emit('cuenta_atras', contador);
@@ -41,6 +42,7 @@ io.on('connection', (socket) => {
                 if (contador < 0) {
                     clearInterval(intervalo);
                     io.emit('inicio_partida');
+                    io.emit('partida_iniciada'); // Emite un evento adicional cuando la partida comienza
                 }
             }, 1000);
         });
