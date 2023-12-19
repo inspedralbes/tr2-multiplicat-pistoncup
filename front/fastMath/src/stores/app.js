@@ -10,6 +10,7 @@ export const useAppStore = defineStore('app', {
       position: 0,
     },
     connectedUsers: [],
+    loggedInUsers: [],
   }),
   actions: {
     setLoginInfo( loggedIn, username ) {      
@@ -43,6 +44,20 @@ export const useAppStore = defineStore('app', {
     },
     updateConnectedUsers(users) {
       this.setUsers(users);
+    },
+    addLoggedInUser(user) {
+      this.loggedInUsers.push(user);
+    },
+
+    removeLoggedInUser(userId) {
+      const index = this.loggedInUsers.findIndex((user) => user.id === userId);
+      if (index !== -1) {
+        this.loggedInUsers.splice(index, 1);
+      }
+    },
+
+    updateLoggedInUsers(users) {
+      this.loggedInUsers = users;
     },
   },
 });

@@ -7,7 +7,7 @@ const URL = process.env.NODE_ENV === "production" ? undefined : "http://localhos
 export const socket = io("http://localhost:3000");
 
 import { useAppStore } from '@/stores/app.js';
-
+/*
 socket.on("connect", () => {
   state.connected = true;
 });
@@ -15,7 +15,7 @@ socket.on("connect", () => {
 socket.on("disconnect", () => {
   state.connected = false;
 });
-
+*/
 
 
 socket.on('arrayUsers', (users) => {

@@ -7,7 +7,8 @@
                 <ul>
                     <li v-for="user in users" :key="user.id">{{ user.username }}</li>
                 </ul>
-                <button @click="unirmePartida" class="play-button">Començar partida</button>
+                <button v-if="isUserAuthenticated" @click="unirmePartida" class="play-button">Començar
+                    partida</button>
             </div>
         </div>
     </body>
@@ -29,24 +30,30 @@ export default {
             const appStore = useAppStore();
             return appStore.connectedUsers;
         },
+        isUserAuthenticated() {
+            // Verificar si el usuario está autenticado y tiene el rol de profesor según localStorage
+            const user = JSON.parse(localStorage.getItem('user'));
+            return user !== null && user.role === 'profesor';
+        },
     },
     methods: {
         unirmePartida() {
-            //Aqui hago un emit solicitud_inicio
             console.log('Enviando solicitud de inicio');
             socket.emit('solicitud_inicio');
         },
-        
     },
     mounted() {
         socket.on('cuenta_atras', (contador) => {
             console.log('Recibido evento de contador');
             this.contador = contador;
         });
-        //aqui tengo un socket_on inicio_partida que me hara el push
+
         socket.on('inicio_partida', () => {
             console.log('Recibido evento de inicio de partida');
+            // Redirigir solo si el usuario está autenticado y tiene el rol de profesor
+
             this.$router.push('/pantallaJoc');
+
         });
     },
 };
