@@ -27,18 +27,24 @@ io.on('connection', (socket) => {
         console.log('Usuario conectado');
         console.log(socket.id);
 
-       
+        // Validación para evitar duplicados
+        const usuarioExistente = usersConectados.find(user => user.username === nuevoUsuario);
+        if (usuarioExistente) {
+            console.error(`Usuario ${nuevoUsuario} ya existe. Elige otro nombre.`);
+            return;
+        }
+
         //hay que hacer un socket on solicitud_inicio que sea simplemente un 
         //emit a TODO EL MUNDO con el eventeo inicia_partida
         socket.on('solicitud_inicio', () => {
             console.log("Solicitud de inicio de partida");
             let contador = 6;
             let start = true;
-        
+
             const intervalo = setInterval(() => {
                 io.emit('cuenta_atras', contador);
                 contador--;
-        
+
                 if (contador < 0) {
                     clearInterval(intervalo);
                     io.emit('inicio_partida');
@@ -57,7 +63,7 @@ io.on('connection', (socket) => {
             for (let i = 0; i < usersConectados.length; i++) {
                 console.log("Hola", usersConectados[i]);
             }
-      
+
 
             socket.on('disconnecting', () => {
                 // Manejar la desconexión cuando se emite el evento 'disconnecting'
@@ -70,9 +76,9 @@ io.on('connection', (socket) => {
                     if (usuarioConectadoIndex !== -1) {
                         usersConectados.splice(usuarioConectadoIndex, 1);
                         io.emit('arrayUsers', usersConectados);
-                        
-                      
-                      }
+
+
+                    }
                 }
             });
         } catch (error) {
@@ -87,9 +93,9 @@ io.on('connection', (socket) => {
         if (usuarioConectadoIndex !== -1) {
             usersConectados.splice(usuarioConectadoIndex, 1);
             io.emit('arrayUsers', usersConectados);
-            
-         
-          }
+
+
+        }
     });
 });
 

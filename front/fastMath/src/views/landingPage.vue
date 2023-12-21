@@ -9,11 +9,12 @@
       </header>
       <div class="formulari">
         <img src="../views/img/logo_fastmath_black.png  " alt="logoFastMath">
-      
+
         <div>
           <label for="pilots">SELECCIONA UN PILOT:</label>
           <select v-model="selectedPilot" id="pilots" name="pilots" size="1">
-            <option v-for="pilot in fetchedData" :key="pilot.id" :value="pilot.pilot_name">
+            <option v-for="pilot in fetchedData" :key="pilot.id" :value="pilot.pilot_name"
+              :disabled="isPilotSelected(pilot.pilot_name)">
               {{ pilot.pilot_name }}
             </option>
           </select>
@@ -41,22 +42,36 @@ export default {
   methods: {
     unirmePartida() {
       if (this.selectedPilot) {
-        
-        socket.emit('Nuevo usuario', this.selectedPilot); // Envía el piloto seleccionado
-        socket.emit("add_user");
-        //guardo los datos en pinia
         const appStore = useAppStore();
-        appStore.setLoginInfo(true,this.selectedPilot);
+        const connectedUsers = appStore.getConnectedUsers();
 
+        // Verificar si el piloto ya está en uso por otro jugador
+        const isPilotInUse = connectedUsers.some(user => user.username === this.selectedPilot);
+
+        if (isPilotInUse) {
+          console.error(`El piloto ${this.selectedPilot} ya está en uso por otro jugador.`);
+          return;
+        }
+
+        // Si el piloto no está en uso, continuar con el proceso
+        socket.emit('Nuevo usuario', this.selectedPilot);
+        socket.emit('add_user');
+        appStore.setLoginInfo(true, this.selectedPilot);
         this.$router.push('/waitingRoom');
       } else {
         console.error('Por favor, selecciona un piloto antes de jugar.');
       }
     },
+    isPilotSelected(pilotName) {
+      const appStore = useAppStore();
+      const connectedUsers = appStore.getConnectedUsers();
+
+      return connectedUsers.some(user => user.username === pilotName);
+    },
     toLogin() {
       this.$router.push('/loginPage');
     },
-    unirmePrueba(){
+    unirmePrueba() {
       if (this.selectedPilot) {
         this.$router.push('/pantallaPrueba');
       } else {
@@ -81,7 +96,7 @@ export default {
     },
   },
   mounted() {
- 
+
 
     this.onMounted();
   },
@@ -102,15 +117,16 @@ body {
 
 header {
   padding: 30px;
-  position: relative; /* Agrega posición relativa para que funcione el posicionamiento absoluto */
+  position: relative;
+  /* Agrega posición relativa para que funcione el posicionamiento absoluto */
 }
 
 header img {
   position: absolute;
-  top: 5px; 
-  right: 10px; 
-  width: 70px; 
-  height: 70px; 
+  top: 5px;
+  right: 10px;
+  width: 70px;
+  height: 70px;
   border-radius: 10px;
 }
 
@@ -121,12 +137,14 @@ header img {
   transform: translateX(-50%);
   font-size: 20px;
   opacity: 0;
-  transition: opacity 0.3s ease; /* Agrega una transición para suavizar el efecto */
+  transition: opacity 0.3s ease;
+  /* Agrega una transición para suavizar el efecto */
   background-color: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 7px;
   border-radius: 5px;
-  pointer-events: none; /* Evita que el tooltip afecte a los eventos del enlace */
+  pointer-events: none;
+  /* Evita que el tooltip afecte a los eventos del enlace */
 }
 
 .login-link:hover .tooltip {
@@ -140,12 +158,14 @@ header img {
   background-repeat: no-repeat;
   background-size: cover;
 }
+
 .formulari img {
   margin-top: -40px;
   width: 100%;
   height: 100%;
   margin-bottom: -30px;
 }
+
 .formulari {
   padding: 20px;
   background-color: rgba(97, 97, 97, 0.89);

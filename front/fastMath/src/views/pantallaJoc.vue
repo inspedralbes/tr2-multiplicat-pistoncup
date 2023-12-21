@@ -239,8 +239,13 @@ export default {
             appStore.loginInfo.points += puntosGanados;
           }
 
-          // Realizar acciones adicionales para una respuesta correcta o incorrecta
-          
+          // Actualizar las posiciones
+          appStore.updatePositions();
+
+          // Actualiza las posiciones y muestra en el carrusel
+          this.updatePositions();
+
+
           // Marcar el botón seleccionado
           this.selectedButton = respuestaIndex;
 
@@ -251,6 +256,23 @@ export default {
           console.error('Error: respuestaCorrecta o respuestaSeleccionada es undefined.');
         }
       }
+    },
+
+    updatePositions() {
+      // Obtiene la información de los usuarios conectados desde el Pinia store
+      const appStore = useAppStore();
+      const connectedUsers = appStore.connectedUsers;
+
+      // Ordena los usuarios por puntos de mayor a menor
+      const sortedUsers = connectedUsers.slice().sort((a, b) => b.points - a.points);
+
+      // Actualiza las posiciones en el store
+      sortedUsers.forEach((user, index) => {
+        user.position = index + 1;
+      });
+
+      // Actualiza el carrusel
+      this.drawImage();
     },
 
     disableAnswerButtons() {
