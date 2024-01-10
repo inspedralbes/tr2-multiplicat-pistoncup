@@ -14,9 +14,8 @@
           <div class="carrusel" ref="carrusel">
             <div class="posicion" v-for="(user, i) in connectedUsers" :key="i">
               <div class="color-franja" :style="{ backgroundColor: colors[i] }"></div>
-              <div class="numero">{{ i + 1 }}</div>
+              <div class="numero">{{ user.position }}</div> <!-- Usar la nueva posición de Pinia -->
               <div class="nombre">{{ user.username }}</div>
-
             </div>
           </div>
         </div>
@@ -87,7 +86,7 @@
 <script>
 import navBar from '../components/nav.vue';
 import { useAppStore } from '../stores/app.js';
-
+import { socket } from '../socket.js';
 
 export default {
   data() {
@@ -196,6 +195,10 @@ export default {
 
     //--------------------------------------------------------------------- pasa a la siguiente pregunta
     nextQuestion() {
+      const appStore = useAppStore();
+      //EMITO AL SERVIDOR MI PUNTUACION
+      socket.emit('EnviarPuntuacion',  {'username':appStore.loginInfo.username,'puntuacion':appStore.loginInfo.points});
+
       if (this.currentQuestionIndex < this.preguntas.length - 1) {
         this.currentQuestionIndex++;
         this.selectedButton = false; // Desmarcar el botón
@@ -228,22 +231,12 @@ export default {
           const appStore = useAppStore();
 
           if (esRespuestaCorrecta) {
-            // Incrementar los puntos para el primero en responder
-            appStore.loginInfo.points += 1000;
-          } else {
-            // Calcular puntos basados en el tiempo restante
-            const puntosBase = 700;
+            const puntosBase = 1120;
             const puntosGanados = Math.max(0, puntosBase - (15 - this.timeRemaining) * 20);
 
             // Incrementar los puntos
             appStore.loginInfo.points += puntosGanados;
           }
-
-          // Actualizar las posiciones
-          appStore.updatePositions();
-
-          // Actualiza las posiciones y muestra en el carrusel
-          this.updatePositions();
 
 
           // Marcar el botón seleccionado
@@ -256,23 +249,6 @@ export default {
           console.error('Error: respuestaCorrecta o respuestaSeleccionada es undefined.');
         }
       }
-    },
-
-    updatePositions() {
-      // Obtiene la información de los usuarios conectados desde el Pinia store
-      const appStore = useAppStore();
-      const connectedUsers = appStore.connectedUsers;
-
-      // Ordena los usuarios por puntos de mayor a menor
-      const sortedUsers = connectedUsers.slice().sort((a, b) => b.points - a.points);
-
-      // Actualiza las posiciones en el store
-      sortedUsers.forEach((user, index) => {
-        user.position = index + 1;
-      });
-
-      // Actualiza el carrusel
-      this.drawImage();
     },
 
     disableAnswerButtons() {

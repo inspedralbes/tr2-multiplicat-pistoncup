@@ -26,3 +26,9 @@ socket.on('arrayUsers', (users) => {
       // Llamar a la acción para actualizar usuarios conectados en Pinia
       appStore.updateConnectedUsers(usersConectados);
 });
+
+socket.on('RankingActualizado', (ranking) => {
+  const appStore = useAppStore();
+  // Guardar el array recibido en la store de Pinia
+  appStore.setRanking(ranking);
+});

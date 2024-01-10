@@ -9,6 +9,8 @@ app.use(cors());
 
 var usersConectados = [];
 
+let Ranking = [];
+
 const server = createServer(app);
 
 const io = new Server(server, {
@@ -23,6 +25,29 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
+
+    socket.on('EnviarPuntuacion', (datos) => {
+        console.log(datos);
+        console.log(Ranking)
+        // Buscar al usuario en el array 'Ranking'
+        let user = Ranking.find(user => user.id === socket.id);
+
+        // Si el usuario existe, actualizar su puntuación
+        if (user) {
+            user.puntuacion = datos.puntuacion;
+        } else {
+            // Si no existe, agregarlo al array con su puntuación
+            Ranking.push({ id: socket.id, username: datos.username , puntuacion: datos.puntuacion });
+        }
+
+        // Ordenar el array 'Ranking' por puntuación en orden descendente
+        Ranking.sort((a, b) => b.puntuacion - a.puntuacion);
+
+        console.log(Ranking);
+        // Emitir el array 'Ranking' a todos los clientes
+        io.emit('RankingActualizado', Ranking);
+    });
+
     socket.on('Nuevo usuario', (nuevoUsuario) => {
         console.log('Usuario conectado');
         console.log(socket.id);
@@ -47,6 +72,8 @@ io.on('connection', (socket) => {
 
                 if (contador < 0) {
                     clearInterval(intervalo);
+                    // resetamos el ranking
+                    Ranking=[];
                     io.emit('inicio_partida');
                     io.emit('partida_iniciada'); // Emite un evento adicional cuando la partida comienza
                 }

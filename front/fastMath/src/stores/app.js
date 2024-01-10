@@ -11,7 +11,12 @@ export const useAppStore = defineStore('app', {
     },
     connectedUsers: [],
     loggedInUsers: [],
+    Ranking: [],
   }),
+  getters: {
+    // Nuevo getter para obtener la posición actual del usuario
+    getPosition: (state) => state.position,
+  },
   actions: {
     setLoginInfo(loggedIn, username) {
       this.loginInfo.loggedIn = loggedIn;
@@ -31,7 +36,9 @@ export const useAppStore = defineStore('app', {
     setUsers(users) {
       this.connectedUsers = users;
     },
-
+    setRanking(ranking) {
+      this.Ranking = ranking;
+    },
     addUser(user) {
       const appStore = useAppStore();
       const existingUser = appStore.getConnectedUsers().find(u => u.id === user.id);
@@ -69,19 +76,6 @@ export const useAppStore = defineStore('app', {
 
     updateLoggedInUsers(users) {
       this.loggedInUsers = users;
-    },
-
-    updatePositions() {
-      // Ordena los usuarios por puntos de mayor a menor
-      const sortedUsers = this.connectedUsers.slice().sort((a, b) => b.points - a.points);
-
-      // Actualiza las posiciones
-      sortedUsers.forEach((user, index) => {
-        user.position = index + 1;
-      });
-
-      // Actualiza el estado
-      this.connectedUsers = sortedUsers;
     },
   },
 });
