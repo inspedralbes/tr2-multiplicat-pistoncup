@@ -230,6 +230,7 @@ export default {
           if (esRespuestaCorrecta) {
             // Incrementar los puntos para el primero en responder
             appStore.loginInfo.points += 1000;
+            this.moveCarUp();
           } else {
             // Calcular puntos basados en el tiempo restante
             const puntosBase = 700;
@@ -258,6 +259,16 @@ export default {
       }
     },
 
+    moveCarUp() {
+      // Ajusta la cantidad que quieres mover el coche hacia arriba
+      const yOffset = 50;
+
+      // Actualiza la posición Y del coche
+      this.y -= yOffset;
+
+      // Vuelve a dibujar el canvas con la nueva posición del coche
+      this.drawImage();
+    },
     updatePositions() {
       // Obtiene la información de los usuarios conectados desde el Pinia store
       const appStore = useAppStore();
