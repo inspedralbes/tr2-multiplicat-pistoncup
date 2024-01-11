@@ -4,8 +4,11 @@ Ha d'incloure, com a mínim
 
 Eines: 
 Programes web: Penpot, Taiga, Github, Chat GPT i Google Docs. 
+
 Aplicacións: Node, Laravel, Vue, MYSQL i Pinia. 
+
 Programes: CSS, HTML. PHP.
+
 Plugins: Visual Studio Code: GitHub Copilot, Error Lens, Live Server, MySQL, node-snippets i Vue 3 Snippets.
 
 ## Instruccions per desplegar el projecte a producció
