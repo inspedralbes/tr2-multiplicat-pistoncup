@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia';
 
+
 export const useAppStore = defineStore('app', {
   state: () => ({
     loginInfo: {
@@ -8,10 +9,12 @@ export const useAppStore = defineStore('app', {
       username: '',
       points: 0,
       position: 0,
+      coche: '',
     },
     connectedUsers: [],
     loggedInUsers: [],
     Ranking: [],
+    cocheNumber: 1,
   }),
   getters: {
     // Nuevo getter para obtener la posición actual del usuario
@@ -19,10 +22,14 @@ export const useAppStore = defineStore('app', {
   },
   actions: {
     setLoginInfo(loggedIn, username) {
+      const numeroCoche=this.connectedUsers.length+1;
       this.loginInfo.loggedIn = loggedIn;
       this.loginInfo.username = username;
       this.loginInfo.points = 0;
       this.loginInfo.position = 0;
+      console.log("numero de coches" + numeroCoche);
+      this.loginInfo.coche = `/img/coches/${numeroCoche}.png`;
+      
     },
     isLoggedIn() {
       return this.loginInfo.loggedIn;
@@ -39,16 +46,8 @@ export const useAppStore = defineStore('app', {
     setRanking(ranking) {
       this.Ranking = ranking;
     },
-    addUser(user) {
-      const appStore = useAppStore();
-      const existingUser = appStore.getConnectedUsers().find(u => u.id === user.id);
-
-      if (!existingUser) {
-        appStore.addUser(user);
-      } else {
-        console.error(`El usuario ${user.username} ya ha sido seleccionado por otro jugador.`);
-      }
-    },
+   
+   
 
     removeUser(userId) {
       const index = this.connectedUsers.findIndex((user) => user.id === userId);
@@ -60,6 +59,8 @@ export const useAppStore = defineStore('app', {
       this.setUsers(users);
     },
     addLoggedInUser(user) {
+      this.cocheNumber=this.connectedUsers.length+1;
+      console.log("numero de coches" + this.cocheNumber);
       // Validar si el usuario ya está en la lista antes de agregarlo
       const existingUser = this.loggedInUsers.find(u => u.id === user.id);
       if (!existingUser) {
