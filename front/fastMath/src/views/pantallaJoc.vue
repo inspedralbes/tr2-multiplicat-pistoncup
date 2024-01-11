@@ -284,46 +284,44 @@ export default {
     //--------------------------------------------------------------------- carga los coches
 
     loadCars() {
-      // Separación entre coches
-      const separation = 50;
-      const ancho = 40; // Ajusta el ancho deseado según tus preferencias
+  const appStore = useAppStore();
+  this.connectedUsers = appStore.connectedUsers;
 
-      for (let i = 1; i <= this.connectedUsers.length; i++) {
-        const carImage = new Image();
-        carImage.src = `/img/coches/${i}.png`;
+  const separation = 50;
+  const ancho = 40;
 
-        // Calcula la altura proporcional para mantener la relación de aspecto
-        carImage.onload = () => {
-          const aspectRatio = carImage.width / carImage.height;
-          const alto = ancho / aspectRatio;
+  for (let i = 0; i < this.connectedUsers.length; i++) {
+    const user = this.connectedUsers[i];
+    const carImage = new Image();
+    carImage.src = appStore.loginInfo.coche;
 
-          // Establece el tamaño deseado de la imagen del coche
-          carImage.width = ancho;
-          carImage.height = alto;
+    carImage.onload = () => {
+      const aspectRatio = carImage.width / carImage.height;
+      const alto = ancho / aspectRatio;
 
-          // Establece la posición inicial en el eje X para cada usuario con separación
-          this.connectedUsers[i - 1].carPositionX = this.x + i * separation;
+      carImage.width = ancho;
+      carImage.height = alto;
 
-          this.cars.push(carImage);
-          this.drawImage(); // Asegúrate de dibujar después de cargar todas las imágenes
-        };
-      }
-    },
+      user.carImage = carImage;
+      user.carPositionX = this.x + (i + 1) * separation;
+
+      this.drawImage();
+    };
+  }
+},
 
     //--------------------------------------------------------------------- imprime el coche en el canva
 
     drawImage() {
-      // Borra el canvas antes de imprimir el coche
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      this.connectedUsers.forEach((user, index) => {
-        const carPositionX = user.carPositionX;
-        const userCar = this.cars[index];
+  this.connectedUsers.forEach((user) => {
+    const carPositionX = user.carPositionX;
+    const userCar = user.carImage;
 
-        // Imprime el coche ajustando la posición y tamaño
-        this.ctx.drawImage(userCar, carPositionX, this.y, userCar.width, userCar.height);
-      });
-    },
+    this.ctx.drawImage(userCar, carPositionX, this.y, userCar.width, userCar.height);
+  });
+},
     moveImage() {
 
     },
@@ -347,20 +345,16 @@ export default {
 
   // Usa el gancho de ciclo de vida 'mounted'
   mounted() {
-    this.startCarousel();
-    this.fetchPreguntas();
-    this.fetchPilots().then(() => {
-      // Carga las imágenes de los coches despues de cargar los pilotos
-      this.loadCars();
-
-      // Obtener el contexto del canvas
-      this.canvas = this.$refs.myCanvas;
-      this.ctx = this.canvas.getContext("2d");
-
-      // Iniciar el temporizador al cargar la página
-      this.startQuestionTimer();
-    });
-  },
+  this.startCarousel();
+  this.fetchPreguntas();
+  this.fetchPilots().then(() => {
+    this.loadCars();
+    this.canvas = this.$refs.myCanvas;
+    this.ctx = this.canvas.getContext("2d");
+    this.startQuestionTimer();
+    this.drawImage(); // Agrega esta línea
+  });
+}
 };
 </script>
 <style scoped>
