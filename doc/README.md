@@ -12,10 +12,12 @@ Plugins: Visual Studio Code: GitHub Copilot, Error Lens, Live Server, MySQL, nod
 Per desplegar el proyecte s'ha de fer el seguent:
 
 1.Baixarse el proyecte desde gitHub.
+
  git clone https://github.com/inspedralbes/tr2-multiplicat-pistoncup.git
  cd .\tr2-multiplicat-pistoncup\
 
 2. Entrar en la carpeta laravel i dintre d'aquesta a FastMath i intalar composer:
+   
 cd .\laravel\FastMath\
 composer install
 
@@ -39,23 +41,27 @@ composer install
      DB_PASSWORD=
 
  6. Entrar en la carpeta nodeapp i instalar npm:
+ 
    cd..
    cd..
    cd .\nodeapp\
    npm install
 
  7. Entrar en la carpeta front i dintre d'aquesta a FastMath i instalar npm:
+
    cd..
    cd .\front\fastMath\
    npm install
 
- 8. Crear arxiu dist:
+ 9. Crear arxiu dist:
+  
    npm run build
 
-9. Traslladar els fitxers al servidor.
+10. Traslladar els fitxers al servidor.
    
-10. Amb el servidor abrir la consola y engegar el node.
-     cd .\nodeapp\
+11. Amb el servidor abrir la consola y engegar el node.
+
+    cd .\nodeapp\
      node node.js
 
 
@@ -65,22 +71,27 @@ composer install
 1. Seguir els passos de la secció Desplegar el projecte a producció.
 
 2. Fer les migrations:
-   cd .\laravel\FastMath\
+
+    cd .\laravel\FastMath\
    php artisan migrate
    
-3. Executar laravel
-   php artisan serve
+4. Executar laravel
+
+    php artisan serve
    
-4. Amb un altre terminal engegar servidor.
+6. Amb un altre terminal engegar servidor.
+
   cd .\nodeapp\
   node node.js
 
-5. Amb un altre terminal engegar servidor.
+8. Amb un altre terminal engegar servidor.
+
   cd .\front\fastMath\
   npm run dev   
   
-6. Veure la web.
-   http://localhost:5173/
+10. Veure la web.
+
+  http://localhost:5173/
 
 
 ## API / Endpoints / punts de comunicació
