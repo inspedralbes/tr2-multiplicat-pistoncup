@@ -9,14 +9,13 @@
           <h3> {{ `${currentQuestionIndex + 1}/${preguntas.length}` }}</h3>
         </div>
       </div>
-      <div id="barraPosiciones" v-if="connectedUsers.length">
+      <div id="barraPosiciones" v-if="Ranking.length">
         <div class="carrusel-container">
           <div class="carrusel" ref="carrusel">
-            <div class="posicion" v-for="(user, i) in connectedUsers" :key="i">
-              <div class="color-franja" :style="{ backgroundColor: colors[i] }"></div>
+            <div class="posicion" v-for="(user, i) in Ranking" :key="i">
+              <div class="color-franja" :style="{ backgroundColor: colors[i % colors.length] }"></div>
               <div class="numero">{{ i + 1 }}</div>
-              <div class="nombre">{{ user.username }}</div> 
-              
+              <div class="nombre">{{ user.username }}</div>
             </div>
           </div>
         </div>
@@ -43,6 +42,7 @@
 
       <div>
         <div class="pregunta" v-if="preguntas.length > 0">
+          <h3>{{ `${connectedUsers.username}` }}</h3>
           <h2 :class="getTimerClass()">{{ `${formatTime(timeRemaining)}` }}</h2>
 
 
@@ -70,7 +70,13 @@
             </button>
           </div>
 
-          <button v-if="currentQuestionIndex === 56" @click="goToPodiumPage">Ir al podio</button>
+
+          <div v-if="isFirst" class="isFirst">
+            <p>Vas primero, ¡no te empanes!</p>
+          </div>
+
+
+          <!-- <button v-if="currentQuestionIndex === 56" @click="goToPodiumPage">Ir al podio</button> -->
           <button id="showDescr" @click="showDescr" v-if="selectedButton">?</button>
         </div>
         <div v-else>
@@ -86,8 +92,8 @@
 
 <script>
 import navBar from '../components/nav.vue';
-import { useAppStore } from '../stores/app.js'; 
-
+import { useAppStore } from '../stores/app.js';
+import { socket } from '../socket.js';
 
 export default {
   data() {
@@ -96,25 +102,26 @@ export default {
       pilots: [],
       currentPilotIndex: 0,
       currentQuestionIndex: 0,
+      isFirst: false,
       autoNextTimer: null,
       timeRemaining: 15,
-      respuestas: [], 
+      respuestas: [],
       selectedButton: false,
       show: false,
       canvas: null,
       ctx: null,
       img: new Image(),
       x: 100,
-      y: 450, 
-      cars: [], 
-      colors:[ 
+      y: 450,
+      cars: [],
+      colors: [
         '#002a38',
         '#006334',
         '#0091ba',
         '#898989',
         '#c70000',
         '#000000',
-        '#780000', 
+        '#780000',
         '#ff0000',
         '#ff7f00',
         '#ffff00',
@@ -145,8 +152,12 @@ export default {
   computed: {
     connectedUsers() {
       const appStore = useAppStore();
-      return appStore.connectedUsers;
+      return appStore.loginInfo;
 
+    },
+    Ranking() {
+      const appStore = useAppStore();
+      return appStore.Ranking;
     },
   },
 
@@ -179,7 +190,6 @@ export default {
       }
     },
 
-
     //--------------------------------------------------------------------- temporizador de la pregunta
 
     startQuestionTimer() {
@@ -211,6 +221,10 @@ export default {
 
     //--------------------------------------------------------------------- pasa a la siguiente pregunta
     nextQuestion() {
+      const appStore = useAppStore();
+      //EMITO AL SERVIDOR MI PUNTUACION
+      socket.emit('EnviarPuntuacion', { 'username': appStore.loginInfo.username, 'puntuacion': appStore.loginInfo.points });
+
       if (this.currentQuestionIndex < this.preguntas.length - 1) {
         this.currentQuestionIndex++;
         this.selectedButton = false; // Desmarcar el botón
@@ -220,6 +234,10 @@ export default {
         // Si es la última pregunta, no incrementar más y mostrar el v-else
         this.currentQuestionIndex = this.preguntas.length - 1;
         clearInterval(this.questionTimer); // Detener el temporizador si es la última pregunta
+        // Agregar lógica para ir al podio automáticamente
+
+        console.log('Enviando solicitud de fin de partida');
+        socket.emit('solicitud_finPartida');
       }
     },
 
@@ -228,46 +246,47 @@ export default {
     //--------------------------------------------------------------------- leer respuesta 
 
     readAnswer(respuestaIndex) {
+      const preguntaIndex = this.currentQuestionIndex;
+
+      // Verificar si ya se ha seleccionado una respuesta
+      if (!this.selectedButton) {
+        // Obtener la información de la pregunta y respuesta
+        const pregunta = this.preguntas[preguntaIndex].enunciat;
+        const respuestaSeleccionada = this.preguntas[preguntaIndex]['resposta' + respuestaIndex]?.toLowerCase();
+        const respuestaCorrecta = this.preguntas[preguntaIndex].correcta?.toLowerCase();
+
+        if (respuestaCorrecta !== undefined && respuestaSeleccionada !== undefined) {
+          const esRespuestaCorrecta = respuestaSeleccionada === respuestaCorrecta;
+
+          const appStore = useAppStore();
+
+          if (esRespuestaCorrecta) {
+            const puntosBase = 1120;
+            const puntosGanados = Math.max(0, puntosBase - (15 - this.timeRemaining) * 20);
+
+            // Incrementar los puntos
+            appStore.loginInfo.points += puntosGanados;
+          }
 
 
-  const preguntaIndex = this.currentQuestionIndex;
+          // Marcar el botón seleccionado
+          this.selectedButton = respuestaIndex;
 
-  // Verificar si ya se ha seleccionado una respuesta
-  if (!this.selectedButton) {
-    // Obtener la información de la pregunta y respuesta
-    const pregunta = this.preguntas[preguntaIndex].enunciat;
-    const respuestaSeleccionada = this.preguntas[preguntaIndex]['resposta' + respuestaIndex]?.toLowerCase();
-    const respuestaCorrecta = this.preguntas[preguntaIndex].correcta?.toLowerCase();
+          // Deshabilitar los botones de respuesta
+          this.disableAnswerButtons();
 
-    if (respuestaCorrecta !== undefined && respuestaSeleccionada !== undefined) {
-      const esRespuestaCorrecta = respuestaSeleccionada === respuestaCorrecta;
-
-      if (esRespuestaCorrecta) {
-        console.log('Respuesta Correcta');
-        // Realizar acciones adicionales para una respuesta correcta
-      } else {
-        console.log('Respuesta Incorrecta');
-        // Realizar acciones adicionales para una respuesta incorrecta
+        } else {
+          console.error('Error: respuestaCorrecta o respuestaSeleccionada es undefined.');
+        }
       }
+    },
 
-      // Marcar el botón seleccionado
-      this.selectedButton = respuestaIndex;
-
+    disableAnswerButtons() {
       // Deshabilitar los botones de respuesta
-      this.disableAnswerButtons();
-
-    } else {
-      console.error('Error: respuestaCorrecta o respuestaSeleccionada es undefined.');
-    }
-  }
-},
-
-disableAnswerButtons() {
-  // Deshabilitar los botones de respuesta
-  for (let i = 1; i <= 4; i++) {
-    document.querySelector(`.resposta:nth-child(${i})`).disabled = true;
-  }
-},
+      for (let i = 1; i <= 4; i++) {
+        document.querySelector(`.resposta:nth-child(${i})`).disabled = true;
+      }
+    },
 
 
     showDescr() {
@@ -280,8 +299,17 @@ disableAnswerButtons() {
     },
     //--------------------------------------------------------------------- ir al podio
 
-    goToPodiumPage() {
-      this.$router.push('/podiumPage');
+    // goToPodiumPage() {
+    //   console.log('Enviando solicitud de fin de partida');
+    //   socket.emit('solicitud_finPartida');
+    // },
+
+    //--------------------------------------------------------------------- decir si vas primero
+
+    isFirstPosition() {
+      const appStore = useAppStore();
+      const userIndex = this.Ranking.findIndex(user => user.username === appStore.loginInfo.username);
+      this.isFirst = userIndex + 1 === 1;
     },
 
     //--------------------------------------------------------------------- carrusel
@@ -289,67 +317,68 @@ disableAnswerButtons() {
     startCarousel() {
       setInterval(() => {
         this.currentPilotIndex = (this.currentPilotIndex + 1) % this.pilots.length;
+        this.isFirstPosition();
         this.drawImage();
       }, 5000);
     },
     //--------------------------------------------------------------------- carga los coches
 
     loadCars() {
-  // Separación entre coches
-  const separation = 50; 
-  const ancho = 40; // Ajusta el ancho deseado según tus preferencias
+      // Separación entre coches
+      const separation = 50;
+      const ancho = 40; // Ajusta el ancho deseado según tus preferencias
 
-  for (let i = 1; i <= this.connectedUsers.length; i++) {
-    const carImage = new Image();
-    carImage.src = `/img/coches/${i}.png`;
+      for (let i = 1; i <= this.Ranking.length; i++) {
+        const carImage = new Image();
+        carImage.src = `/img/coches/${i}.png`;
 
-    // Calcula la altura proporcional para mantener la relación de aspecto
-    carImage.onload = () => {
-      const aspectRatio = carImage.width / carImage.height;
-      const alto = ancho / aspectRatio;
+        // Calcula la altura proporcional para mantener la relación de aspecto
+        carImage.onload = () => {
+          const aspectRatio = carImage.width / carImage.height;
+          const alto = ancho / aspectRatio;
 
-      // Establece el tamaño deseado de la imagen del coche
-      carImage.width = ancho;
-      carImage.height = alto;
+          // Establece el tamaño deseado de la imagen del coche
+          carImage.width = ancho;
+          carImage.height = alto;
 
-      // Establece la posición inicial en el eje X para cada usuario con separación
-      this.connectedUsers[i - 1].carPositionX = this.x + i * separation;
+          // Establece la posición inicial en el eje X para cada usuario con separación
+          this.Ranking[i - 1].carPositionX = this.x + i * separation;
 
-      this.cars.push(carImage);
-      this.drawImage(); // Asegúrate de dibujar después de cargar todas las imágenes
-    };
-  }
-},
+          this.cars.push(carImage);
+          this.drawImage(); // Asegúrate de dibujar después de cargar todas las imágenes
+        };
+      }
+    },
 
     //--------------------------------------------------------------------- imprime el coche en el canva
 
     drawImage() {
-  // Borra el canvas antes de imprimir el coche
-  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      // Borra el canvas antes de imprimir el coche
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-  this.connectedUsers.forEach((user, index) => {
-    const carPositionX = user.carPositionX;
-    const userCar = this.cars[index];
+      this.Ranking.forEach((user, index) => {
+        const carPositionX = user.carPositionX;
+        const userCar = this.cars[index];
 
-    // Imprime el coche ajustando la posición y tamaño
-    this.ctx.drawImage(userCar, carPositionX, this.y, userCar.width, userCar.height);
-  });
-},
+        // Imprime el coche ajustando la posición y tamaño
+        this.ctx.drawImage(userCar, carPositionX, this.y, userCar.width, userCar.height);
+      });
+    },
     moveImage() {
 
     },
 
 
-    generateRandomColor() {
-      if (!this.randomColor) {
+    generateRandomColor(username) {
+      if (!this.userColors[username]) {
         const letters = '0123456789ABCDEF';
         let color = '#';
         for (let i = 0; i < 6; i++) {
           color += letters[Math.floor(Math.random() * 16)];
         }
-        this.randomColor = color; // Almacena el color generado para su uso posterior
+        this.userColors[username] = color; // Almacena el color generado para el usuario
       }
-      return this.randomColor;
+      return this.userColors[username];
     },
 
 
@@ -369,7 +398,13 @@ disableAnswerButtons() {
       this.ctx = this.canvas.getContext("2d");
 
       // Iniciar el temporizador al cargar la página
-      this.startQuestionTimer(); 
+      this.startQuestionTimer();
+
+      socket.on('fin_partida', () => {
+        console.log('Recibido evento de fin de partida');
+        this.$router.push('/podiumPage');
+      });
+
     });
   },
 };
@@ -556,7 +591,10 @@ disableAnswerButtons() {
     display: flex;
     animation: scrollCarrusel 70s linear infinite;
   }
-
+   
+  .isFirst{
+    font-size: 1.5em;
+  }
 
   .posicion {
     width: 10px;

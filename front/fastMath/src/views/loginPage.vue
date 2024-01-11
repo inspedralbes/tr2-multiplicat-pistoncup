@@ -80,6 +80,9 @@ export default {
         console.error('Por favor, ingresa un correo electrónico y una contraseña.');
       }
     },
+    irLanding() {
+      this.$router.push('/');
+    },
   },
 };
 </script>

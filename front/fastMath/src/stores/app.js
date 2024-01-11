@@ -11,9 +11,14 @@ export const useAppStore = defineStore('app', {
     },
     connectedUsers: [],
     loggedInUsers: [],
+    Ranking: [],
   }),
+  getters: {
+    // Nuevo getter para obtener la posición actual del usuario
+    getPosition: (state) => state.position,
+  },
   actions: {
-    setLoginInfo( loggedIn, username ) {      
+    setLoginInfo(loggedIn, username) {
       this.loginInfo.loggedIn = loggedIn;
       this.loginInfo.username = username;
       this.loginInfo.points = 0;
@@ -31,9 +36,18 @@ export const useAppStore = defineStore('app', {
     setUsers(users) {
       this.connectedUsers = users;
     },
-
+    setRanking(ranking) {
+      this.Ranking = ranking;
+    },
     addUser(user) {
-      this.connectedUsers.push(user);
+      const appStore = useAppStore();
+      const existingUser = appStore.getConnectedUsers().find(u => u.id === user.id);
+
+      if (!existingUser) {
+        appStore.addUser(user);
+      } else {
+        console.error(`El usuario ${user.username} ya ha sido seleccionado por otro jugador.`);
+      }
     },
 
     removeUser(userId) {
@@ -46,7 +60,11 @@ export const useAppStore = defineStore('app', {
       this.setUsers(users);
     },
     addLoggedInUser(user) {
-      this.loggedInUsers.push(user);
+      // Validar si el usuario ya está en la lista antes de agregarlo
+      const existingUser = this.loggedInUsers.find(u => u.id === user.id);
+      if (!existingUser) {
+        this.loggedInUsers.push(user);
+      }
     },
 
     removeLoggedInUser(userId) {
