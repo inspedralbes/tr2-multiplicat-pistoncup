@@ -95,4 +95,9 @@ composer install
 
 
 ## API / Endpoints / punts de comunicació
-Heu d'indicar quins són els punts d'entrada de la API i quins són els JSON que s'envien i es reben a cada endpoint
+Api Laravel:
+ -Nom Api: fetchPreguntas
+ -method: POST
+
+ ![image](https://github.com/inspedralbes/tr2-multiplicat-pistoncup/assets/124352502/13fd826a-68f9-4e92-acdb-f7f15f9cdc6d)
+
