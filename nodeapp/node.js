@@ -80,6 +80,11 @@ io.on('connection', (socket) => {
             }, 1000);
         });
 
+        socket.on('solicitud_finPartida', () => {
+            console.log("Solicitud de fin de partida");
+            io.emit('fin_partida');
+        });
+
 
 
         try {

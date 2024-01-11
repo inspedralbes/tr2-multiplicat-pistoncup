@@ -1,75 +1,152 @@
 <template>
-    <body>
+  <body>
+    <div class="granContenidor">
+      <img id="logo" src="../views/img/logo_fastmath_black.png  " alt="logoFastMath" height="200px">
 
-        <div class="podio">
-            <div class="puesto puesto1">
-                <h2>Puesto 1</h2>
-            </div>
-            <div class="puesto puesto2">
-                <h2>Puesto 2</h2>
-            </div>
-            <div class="puesto puesto3">
-                <h2>Puesto 3</h2>
-            </div>
+      <div class="podio">
+        <div class="puesto puesto2" v-if="Ranking[1]">
+          <div class="posiciones">
+            <h1>2</h1>
+          </div>
+          <div class="pilotos">
+            <h2>{{ Ranking[1].username }}</h2>
+            <h3>{{ Ranking[1].puntuacion }} Punts</h3>
+          </div>
         </div>
+        <div class="puesto puesto1" v-if="Ranking[0]">
+          <div class="posiciones">
+            <h1>1</h1>
+          </div>
+          <div class="pilotos">
+            <h2>{{ Ranking[0].username }}</h2>
+            <h3>{{ Ranking[0].puntuacion }} Punts</h3>
+          </div>
+        </div>
+        <div class="puesto puesto3" v-if="Ranking[2]">
+          <div class="posiciones">
+            <h1>3</h1>
+          </div>
+          <div class="pilotos">
+            <h2>{{ Ranking[2].username }}</h2>
+            <h3>{{ Ranking[2].puntuacion }} Punts</h3>
+          </div>
+        </div>
+      </div>
+      <button @click="irLanding" class="tornar-button" type="button">Tornar</button>
+    </div>
 
-    </body>
+
+  </body>
 </template>
   
 <script>
+import { useAppStore } from '../stores/app.js';
+
 export default {
-    data() {
-        return {};
+  name: 'PodiumPage',
+  computed: {
+    Ranking() {
+      const appStore = useAppStore();
+      return appStore.Ranking;
     },
-    methods: {},
-    mounted() { },
+  },
+  methods: {
+    irLanding() {
+      this.$router.push('/');
+    },
+  },
 };
 </script>
-  
+
 <style scoped>
 body {
-      font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background-color: #f2f2f2;
-    }
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background-image: url("../views/img/fondo_podium.gif");
+  background-repeat: no-repeat;
+  background-size: cover;
 
-    .podio {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
 
-    .puesto {
-      width: 200px;
-      height: 100px;
-      background-color: #d4af37;
-      border-radius: 8px;
-      margin: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
 
-    .puesto1 {
-      background-color: #ffd700; /* Oro */
-    }
+}
 
-    .puesto2 {
-      background-color: #c0c0c0; /* Plata */
-    }
 
-    .puesto3 {
-      background-color: #cd7f32; /* Bronce */
-    }
+.granContenidor {
+  width: 60%;
+  height: 100%;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  background-color: none;
 
-    .puesto h2 {
-      margin: 0;
-      color: #fff;
-    }
+}
+
+.podio {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+
+}
+
+.puesto {
+  width: 200px;
+  height: 200px;
+  background-color: #d4af37;
+  border-radius: 8px;
+  margin: 10px;
+  display: grid;
+  grid-template-columns: 1fr;
+  text-align: center;
+  padding: 50px;
+  box-shadow: rgba(0, 0, 0, 0.5);
+}
+
+.puesto1 {
+  font-size: 1.2em;
+  background-color: #ffd700;
+  color: ffd700;
+  /* Oro */
+}
+
+.puesto2 {
+  font-size: 1em;
+  background-color: #c0c0c0;
+  /* Plata */
+}
+
+.puesto3 {
+  font-size: 0.9em;
+  background-color: #cd7f32;
+  /* Bronce */
+}
+
+.puesto h1 {
+  margin: 0;
+  color: var(--darkGray);
+  font-weight: bolder;
+}
+
+#logo {
+  margin: auto;
+}
+
+.tornar-button {
+  background-color: rgb(255, 253, 253);
+  color: rgb(0, 0, 0);
+  border: none;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 8px;
+  width: 100%;
+  height: 30%;
+  border: 2px solid rgb(48, 48, 48);
+  /* Ancho del botón al 100% */
+}
+
 </style>
-  

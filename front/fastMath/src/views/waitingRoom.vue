@@ -53,9 +53,7 @@ export default {
             console.log('Recibido evento de inicio de partida');
             // Cambia el valor de mostrarImagen a true cuando se recibe el evento 'partida_iniciada'
             this.mostrarImagen = true;
-
-            
-                this.$router.push('/pantallaJoc');
+            this.$router.push('/pantallaJoc');
         });
     },
 };

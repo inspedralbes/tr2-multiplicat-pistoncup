@@ -9,12 +9,12 @@
           <h3> {{ `${currentQuestionIndex + 1}/${preguntas.length}` }}</h3>
         </div>
       </div>
-      <div id="barraPosiciones" v-if="connectedUsers.length">
+      <div id="barraPosiciones" v-if="Ranking.length">
         <div class="carrusel-container">
           <div class="carrusel" ref="carrusel">
-            <div class="posicion" v-for="(user, i) in connectedUsers" :key="i">
-              <div class="color-franja" :style="{ backgroundColor: colors[i] }"></div>
-              <div class="numero">{{ user.position }}</div> <!-- Usar la nueva posición de Pinia -->
+            <div class="posicion" v-for="(user, i) in Ranking" :key="i">
+              <div class="color-franja" :style="{ backgroundColor: colors[i % colors.length] }"></div>
+              <div class="numero">{{ i + 1 }}</div>
               <div class="nombre">{{ user.username }}</div>
             </div>
           </div>
@@ -42,6 +42,7 @@
 
       <div>
         <div class="pregunta" v-if="preguntas.length > 0">
+          <h3>{{ `${connectedUsers.username}` }}</h3>
           <h2 :class="getTimerClass()">{{ `${formatTime(timeRemaining)}` }}</h2>
 
 
@@ -69,7 +70,13 @@
             </button>
           </div>
 
-          <button v-if="currentQuestionIndex === 56" @click="goToPodiumPage">Ir al podio</button>
+
+          <div v-if="isFirst" class="isFirst">
+            <p>Vas primero, ¡no te empanes!</p>
+          </div>
+
+
+          <!-- <button v-if="currentQuestionIndex === 56" @click="goToPodiumPage">Ir al podio</button> -->
           <button id="showDescr" @click="showDescr" v-if="selectedButton">?</button>
         </div>
         <div v-else>
@@ -95,6 +102,7 @@ export default {
       pilots: [],
       currentPilotIndex: 0,
       currentQuestionIndex: 0,
+      isFirst: false,
       autoNextTimer: null,
       timeRemaining: 15,
       respuestas: [],
@@ -117,6 +125,21 @@ export default {
         '#ff0000',
         '#ff7f00',
         '#ffff00',
+        '#0020af',
+        '#00eeef',
+        '#c05d00',  
+        '#679d4c',
+        '#81498a',
+        '#cdcdcd',
+        '#3e3e3e',
+        '#3d3148',
+        '#4f3831',
+        '#e43c00',
+        '#dcbe00',
+        '#6e3d3d',
+        '#acacac',
+        '#006600',
+        '#780000',
       ],
 
     };
@@ -129,8 +152,12 @@ export default {
   computed: {
     connectedUsers() {
       const appStore = useAppStore();
-      return appStore.connectedUsers;
+      return appStore.loginInfo;
 
+    },
+    Ranking() {
+      const appStore = useAppStore();
+      return appStore.Ranking;
     },
   },
 
@@ -162,7 +189,6 @@ export default {
         console.error('Error fetching pilots:', error);
       }
     },
-
 
     //--------------------------------------------------------------------- temporizador de la pregunta
 
@@ -197,7 +223,7 @@ export default {
     nextQuestion() {
       const appStore = useAppStore();
       //EMITO AL SERVIDOR MI PUNTUACION
-      socket.emit('EnviarPuntuacion',  {'username':appStore.loginInfo.username,'puntuacion':appStore.loginInfo.points});
+      socket.emit('EnviarPuntuacion', { 'username': appStore.loginInfo.username, 'puntuacion': appStore.loginInfo.points });
 
       if (this.currentQuestionIndex < this.preguntas.length - 1) {
         this.currentQuestionIndex++;
@@ -208,6 +234,10 @@ export default {
         // Si es la última pregunta, no incrementar más y mostrar el v-else
         this.currentQuestionIndex = this.preguntas.length - 1;
         clearInterval(this.questionTimer); // Detener el temporizador si es la última pregunta
+        // Agregar lógica para ir al podio automáticamente
+
+        console.log('Enviando solicitud de fin de partida');
+        socket.emit('solicitud_finPartida');
       }
     },
 
@@ -269,8 +299,17 @@ export default {
     },
     //--------------------------------------------------------------------- ir al podio
 
-    goToPodiumPage() {
-      this.$router.push('/podiumPage');
+    // goToPodiumPage() {
+    //   console.log('Enviando solicitud de fin de partida');
+    //   socket.emit('solicitud_finPartida');
+    // },
+
+    //--------------------------------------------------------------------- decir si vas primero
+
+    isFirstPosition() {
+      const appStore = useAppStore();
+      const userIndex = this.Ranking.findIndex(user => user.username === appStore.loginInfo.username);
+      this.isFirst = userIndex + 1 === 1;
     },
 
     //--------------------------------------------------------------------- carrusel
@@ -278,12 +317,13 @@ export default {
     startCarousel() {
       setInterval(() => {
         this.currentPilotIndex = (this.currentPilotIndex + 1) % this.pilots.length;
+        this.isFirstPosition();
         this.drawImage();
       }, 5000);
     },
     //--------------------------------------------------------------------- carga los coches
 
-    loadCars() {
+     loadCars() {
   const appStore = useAppStore();
   this.connectedUsers = appStore.connectedUsers;
 
@@ -312,7 +352,7 @@ export default {
 
     //--------------------------------------------------------------------- imprime el coche en el canva
 
-    drawImage() {
+   drawImage() {
   this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
   this.connectedUsers.forEach((user) => {
@@ -322,21 +362,19 @@ export default {
     this.ctx.drawImage(userCar, carPositionX, this.y, userCar.width, userCar.height);
   });
 },
-    moveImage() {
-
-    },
+    
 
 
-    generateRandomColor() {
-      if (!this.randomColor) {
+    generateRandomColor(username) {
+      if (!this.userColors[username]) {
         const letters = '0123456789ABCDEF';
         let color = '#';
         for (let i = 0; i < 6; i++) {
           color += letters[Math.floor(Math.random() * 16)];
         }
-        this.randomColor = color; // Almacena el color generado para su uso posterior
+        this.userColors[username] = color; // Almacena el color generado para el usuario
       }
-      return this.randomColor;
+      return this.userColors[username];
     },
 
 
@@ -345,16 +383,30 @@ export default {
 
   // Usa el gancho de ciclo de vida 'mounted'
   mounted() {
-  this.startCarousel();
-  this.fetchPreguntas();
-  this.fetchPilots().then(() => {
-    this.loadCars();
-    this.canvas = this.$refs.myCanvas;
-    this.ctx = this.canvas.getContext("2d");
-    this.startQuestionTimer();
-    this.drawImage(); // Agrega esta línea
-  });
-}
+
+    this.startCarousel();
+    this.fetchPreguntas();
+    this.fetchPilots().then(() => {
+      // Carga las imágenes de los coches despues de cargar los pilotos
+      this.loadCars();
+      
+
+      // Obtener el contexto del canvas
+      this.canvas = this.$refs.myCanvas;
+      this.ctx = this.canvas.getContext("2d");
+
+      // Iniciar el temporizador al cargar la página
+      this.startQuestionTimer();
+      this.drawImage();
+
+      socket.on('fin_partida', () => {
+        console.log('Recibido evento de fin de partida');
+        this.$router.push('/podiumPage');
+      });
+
+    });
+  },
+
 };
 </script>
 <style scoped>
@@ -539,7 +591,10 @@ export default {
     display: flex;
     animation: scrollCarrusel 70s linear infinite;
   }
-
+   
+  .isFirst{
+    font-size: 1.5em;
+  }
 
   .posicion {
     width: 10px;
