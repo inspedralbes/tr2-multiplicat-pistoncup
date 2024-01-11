@@ -125,21 +125,6 @@ export default {
         '#ff0000',
         '#ff7f00',
         '#ffff00',
-        '#0020af',
-        '#00eeef',
-        '#c05d00',  
-        '#679d4c',
-        '#81498a',
-        '#cdcdcd',
-        '#3e3e3e',
-        '#3d3148',
-        '#4f3831',
-        '#e43c00',
-        '#dcbe00',
-        '#6e3d3d',
-        '#acacac',
-        '#006600',
-        '#780000',
       ],
 
     };
@@ -323,46 +308,50 @@ export default {
     },
     //--------------------------------------------------------------------- carga los coches
 
-     loadCars() {
-  const appStore = useAppStore();
-  this.connectedUsers = appStore.connectedUsers;
+    loadCars() {
+      // Separación entre coches
+      const separation = 50;
+      const ancho = 40; // Ajusta el ancho deseado según tus preferencias
 
-  const separation = 50;
-  const ancho = 40;
+      for (let i = 1; i <= this.Ranking.length; i++) {
+        const carImage = new Image();
+        carImage.src = `/img/coches/${i}.png`;
 
-  for (let i = 0; i < this.connectedUsers.length; i++) {
-    const user = this.connectedUsers[i];
-    const carImage = new Image();
-    carImage.src = appStore.loginInfo.coche;
+        // Calcula la altura proporcional para mantener la relación de aspecto
+        carImage.onload = () => {
+          const aspectRatio = carImage.width / carImage.height;
+          const alto = ancho / aspectRatio;
 
-    carImage.onload = () => {
-      const aspectRatio = carImage.width / carImage.height;
-      const alto = ancho / aspectRatio;
+          // Establece el tamaño deseado de la imagen del coche
+          carImage.width = ancho;
+          carImage.height = alto;
 
-      carImage.width = ancho;
-      carImage.height = alto;
+          // Establece la posición inicial en el eje X para cada usuario con separación
+          this.Ranking[i - 1].carPositionX = this.x + i * separation;
 
-      user.carImage = carImage;
-      user.carPositionX = this.x + (i + 1) * separation;
-
-      this.drawImage();
-    };
-  }
-},
+          this.cars.push(carImage);
+          this.drawImage(); // Asegúrate de dibujar después de cargar todas las imágenes
+        };
+      }
+    },
 
     //--------------------------------------------------------------------- imprime el coche en el canva
 
-   drawImage() {
-  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    drawImage() {
+      // Borra el canvas antes de imprimir el coche
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-  this.connectedUsers.forEach((user) => {
-    const carPositionX = user.carPositionX;
-    const userCar = user.carImage;
+      this.Ranking.forEach((user, index) => {
+        const carPositionX = user.carPositionX;
+        const userCar = this.cars[index];
 
-    this.ctx.drawImage(userCar, carPositionX, this.y, userCar.width, userCar.height);
-  });
-},
-    
+        // Imprime el coche ajustando la posición y tamaño
+        this.ctx.drawImage(userCar, carPositionX, this.y, userCar.width, userCar.height);
+      });
+    },
+    moveImage() {
+
+    },
 
 
     generateRandomColor(username) {
@@ -383,13 +372,11 @@ export default {
 
   // Usa el gancho de ciclo de vida 'mounted'
   mounted() {
-
     this.startCarousel();
     this.fetchPreguntas();
     this.fetchPilots().then(() => {
       // Carga las imágenes de los coches despues de cargar los pilotos
       this.loadCars();
-      
 
       // Obtener el contexto del canvas
       this.canvas = this.$refs.myCanvas;
@@ -397,7 +384,6 @@ export default {
 
       // Iniciar el temporizador al cargar la página
       this.startQuestionTimer();
-      this.drawImage();
 
       socket.on('fin_partida', () => {
         console.log('Recibido evento de fin de partida');
@@ -406,7 +392,6 @@ export default {
 
     });
   },
-
 };
 </script>
 <style scoped>
