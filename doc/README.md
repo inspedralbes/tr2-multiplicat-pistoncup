@@ -96,8 +96,19 @@ composer install
 
 ## API / Endpoints / punts de comunicació
 Api Laravel:
- -Nom Api: fetchPreguntas
- -method: POST
+
+ Nom Api: Preguntas
+ Method: POST
 
  ![image](https://github.com/inspedralbes/tr2-multiplicat-pistoncup/assets/124352502/13fd826a-68f9-4e92-acdb-f7f15f9cdc6d)
+
+Nom Api: pilots
+Method: Post
+
+![image](https://github.com/inspedralbes/tr2-multiplicat-pistoncup/assets/124352502/b53a0872-3009-4306-a787-413ea9e528ae)
+
+
+ Sockets Node
+
+ 
 
