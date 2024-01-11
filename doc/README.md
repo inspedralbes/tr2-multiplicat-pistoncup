@@ -71,11 +71,11 @@ composer install
 3. Executar laravel
    php artisan serve
    
-4.Amb un altre terminal engegar servidor.
+4. Amb un altre terminal engegar servidor.
   cd .\nodeapp\
   node node.js
 
-5.Amb un altre terminal engegar servidor.
+5. Amb un altre terminal engegar servidor.
   cd .\front\fastMath\
   npm run dev   
   
