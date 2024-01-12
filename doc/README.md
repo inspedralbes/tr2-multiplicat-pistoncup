@@ -135,7 +135,8 @@ Method: Post
 
  Dades Vue:
 
- ![image](https://github.com/inspedralbes/tr2-multiplicat-pistoncup/assets/124352502/5e2e538d-2427-4de2-91ea-530b2686d843)
+![image](https://github.com/inspedralbes/tr2-multiplicat-pistoncup/assets/124352502/854f74b4-15a8-4305-81b6-60cae4990f00)
+
 
 
 
