@@ -131,5 +131,11 @@ Method: Post
 
  Sockets Node
 
- 
+ ![image](https://github.com/inspedralbes/tr2-multiplicat-pistoncup/assets/124352502/678a1026-74f6-47ec-94bc-a2e5f5dfec47)
+
+ Dades Vue:
+
+ ![image](https://github.com/inspedralbes/tr2-multiplicat-pistoncup/assets/124352502/5e2e538d-2427-4de2-91ea-530b2686d843)
+
+
 
